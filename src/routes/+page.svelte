@@ -271,8 +271,8 @@
 
 	<!-- 서비스 설명 -->
 	<div class="service-desc">
-		<p class="service-main">매일, 함께 생각합니다</p>
-		<p class="service-sub">아는 것 같았던 것들을 다시 꺼내보는 공간 — 함께 답을 만들어가요</p>
+		<p class="service-main">매일, 함께 함</p>
+		<p class="service-sub">아는 것 같았던 것들을 다시 꺼내보는 공간</p>
 	</div>
 </div>
 
@@ -290,7 +290,7 @@
 	<h2 class="sm-question">{stackLetter.question}</h2>
 	<hr class="sm-rule" />
 	<p class="sm-preview">{stackLetter.preview}</p>
-	<p class="sm-note">* 매일함은 정답을 제공하지 않습니다. GitHub Discussion에서 함께 모범답안을 만들어가세요.</p>
+	<p class="sm-note">* 매일함은 정답을 제공하지 않습니다. GitHub Repo에서 함께 모범답안을 만들어가요.</p>
 
 	<!-- 네비게이션 -->
 	<div class="sm-nav">

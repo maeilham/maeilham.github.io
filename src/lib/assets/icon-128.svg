@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <defs>
+    <linearGradient id="frameGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#e6e6e8"/>
+      <stop offset="40%"  stop-color="#d2d2d4"/>
+      <stop offset="100%" stop-color="#b2b2b4"/>
+    </linearGradient>
+    <linearGradient id="panelGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#ccccce"/>
+      <stop offset="100%" stop-color="#b0b0b2"/>
+    </linearGradient>
+    <radialGradient id="lockGrad" cx="38%" cy="35%" r="65%">
+      <stop offset="0%"   stop-color="#ececec"/>
+      <stop offset="100%" stop-color="#7a7a7a"/>
+    </radialGradient>
+  </defs>
+
+  <!-- ── Outer frame (120×82, 세로 중앙 정렬) ── -->
+  <rect x="5"  y="24" width="119" height="82" rx="6" fill="#6a6a6a"/>
+  <rect x="4"  y="23" width="119" height="82" rx="6" fill="url(#frameGrad)"/>
+  <!-- Top/left highlight -->
+  <rect x="5.5"  y="24" width="116.5" height="2"  rx="2" fill="rgba(255,255,255,0.65)"/>
+  <rect x="5"  y="24" width="2"   height="80" rx="2" fill="rgba(255,255,255,0.45)"/>
+  <!-- Bottom/right shadow -->
+  <rect x="4"  y="103" width="118" height="2" rx="2" fill="rgba(0,0,0,0.28)"/>
+  <rect x="121" y="23" width="2"  height="81" rx="2" fill="rgba(0,0,0,0.22)"/>
+
+  <!-- ── Inner recessed panel ── -->
+  <rect x="11" y="30" width="107" height="68" rx="4" fill="#5a5a5a"/>
+  <rect x="12" y="30" width="107" height="68" rx="4" fill="#d4d4d4"/>
+  <rect x="12" y="31" width="106" height="67" rx="3" fill="url(#panelGrad)"/>
+
+  <!-- ── Left eye ── -->
+  <ellipse cx="39"  cy="55" rx="15" ry="10" fill="#424242"/>
+  <ellipse cx="39"  cy="55" rx="13.5" ry="8.5" fill="#111"/>
+  <ellipse cx="39"  cy="52.5" rx="10" ry="4"   fill="rgba(255,255,255,0.07)"/>
+
+  <!-- ── Right eye ── -->
+  <ellipse cx="89" cy="55" rx="15" ry="10" fill="#424242"/>
+  <ellipse cx="89" cy="55" rx="13.5" ry="8.5" fill="#111"/>
+  <ellipse cx="89" cy="52.5" rx="10" ry="4"   fill="rgba(255,255,255,0.07)"/>
+
+  <!-- ── Nose (lock) ── -->
+  <circle cx="64" cy="70" r="8"   fill="#424242"/>
+  <circle cx="64" cy="70" r="6.5" fill="url(#lockGrad)"/>
+  <circle cx="64" cy="69" r="2"   fill="#606060"/>
+  <rect   x="62.5" y="71" width="3" height="4" rx="0.8" fill="#606060"/>
+
+  <!-- ── Mouth (slot) ── -->
+  <rect x="20" y="82"  width="88" height="11" rx="3"   fill="#424242"/>
+  <rect x="21" y="83"  width="86" height="9"  rx="2.5" fill="#101010"/>
+  <rect x="21" y="83"  width="86" height="3"  rx="2.5" fill="#080808"/>
+  <rect x="22" y="91"  width="84" height="1"  rx="1"   fill="rgba(255,255,255,0.09)"/>
+</svg>

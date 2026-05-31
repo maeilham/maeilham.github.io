@@ -133,12 +133,16 @@
 		phase = "inserting";
 		overSlot = false;
 
+		// TODO: remove mock before launch
+		const MOCK = true;
 		const [res] = await Promise.all([
-			fetch(`${API}/api/subscribe`, {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ email }),
-			}).catch(() => null),
+			MOCK
+				? Promise.resolve(new Response(null, { status: 200 }))
+				: fetch(`${API}/api/subscribe`, {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({ email }),
+				  }).catch(() => null),
 			new Promise(r => setTimeout(r, 750)),
 		]);
 
@@ -191,23 +195,18 @@
 	<div class="locker-grid desktop-grid">
 		{#each desktopItems as item}
 			{#if item === "display"}
-				<div class="box display-box"><div class="display-screen">
-					<p class="display-label">매일함</p>
+				<div class="box display-box"><div class="display-screen" class:display-sent={phase === "sent"}>
+					<p class="display-label" class:display-label-sent={phase === "sent"}>{phase === "sent" ? "구독 완료" : "매일함"}</p>
 					<p class="display-sub">매일함으로, 매일 함.</p>
-					<div class="display-dot"></div>
+					<div class="display-dot" class:display-dot-sent={phase === "sent"}></div>
 				</div></div>
 			{:else if item === "letter"}
 				<div class="box letter-box">
-					{#if phase !== "sent"}
+					{#if phase === "idle"}
 						<button class="letter-peek" onclick={openCard} aria-label="편지 열기">
 							<div class="envelope-flap"></div>
 							<div class="envelope-body"><span class="envelope-label">매일함</span></div>
 						</button>
-					{:else}
-						<div class="letter-peek sent-peek">
-							<div class="envelope-flap flap-closed"></div>
-							<div class="envelope-body"><span class="envelope-label">✓</span></div>
-						</div>
 					{/if}
 					<div class="slot"></div><div class="lock"></div>
 				</div>
@@ -234,23 +233,18 @@
 	<div class="locker-grid mobile-grid">
 		{#each mobileItems as item}
 			{#if item === "display"}
-				<div class="box display-box"><div class="display-screen">
-					<p class="display-label">매일함</p>
+				<div class="box display-box"><div class="display-screen" class:display-sent={phase === "sent"}>
+					<p class="display-label" class:display-label-sent={phase === "sent"}>{phase === "sent" ? "구독 완료" : "매일함"}</p>
 					<p class="display-sub">매일함으로, 매일 함.</p>
-					<div class="display-dot"></div>
+					<div class="display-dot" class:display-dot-sent={phase === "sent"}></div>
 				</div></div>
 			{:else if item === "letter"}
 				<div class="box letter-box">
-					{#if phase !== "sent"}
+					{#if phase === "idle"}
 						<button class="letter-peek" onclick={openCard} aria-label="편지 열기">
 							<div class="envelope-flap"></div>
 							<div class="envelope-body"><span class="envelope-label">매일함</span></div>
 						</button>
-					{:else}
-						<div class="letter-peek sent-peek">
-							<div class="envelope-flap flap-closed"></div>
-							<div class="envelope-body"><span class="envelope-label">✓</span></div>
-						</div>
 					{/if}
 					<div class="slot"></div><div class="lock"></div>
 				</div>
@@ -273,14 +267,12 @@
 		{/each}
 	</div>
 
-	{#if phase === "sent"}
-		<p class="sent-notice">✉ 확인 메일을 보냈습니다 — 메일함을 확인해주세요</p>
-	{/if}
+	<p class="sent-notice" class:sent-notice-visible={phase === "sent"}>✉ 확인 메일을 보냈습니다 — 메일함을 확인해주세요</p>
 
 	<!-- 서비스 설명 -->
 	<div class="service-desc">
-		<p class="service-main">매일 아침, 개발 면접 질문 1통</p>
-		<p class="service-sub">GitHub Discussion에서 함께 답을 만들어가는 개발자 학습 커뮤니티</p>
+		<p class="service-main">매일, 함께 생각합니다</p>
+		<p class="service-sub">아는 것 같았던 것들을 다시 꺼내보는 공간 — 함께 답을 만들어가요</p>
 	</div>
 </div>
 
@@ -320,6 +312,9 @@
 <!-- 드래그 가능한 편지 카드 -->
 {#if phase !== "idle" && phase !== "sent"}
 <div
+	role="button"
+	tabindex="0"
+	aria-label="이메일 입력 후 드래그해서 구독하기"
 	class="letter-card"
 	class:is-over={overSlot && isDragging}
 	style={cardStyle}
@@ -330,8 +325,10 @@
 	onpointercancel={onCancel}
 >
 	{#if isDragging}
-		<!-- 드래그 중: 미니 봉투 모양 -->
-		<div class="mini-env-flap"></div>
+		<!-- 드래그 중: 미니 봉투 -->
+		<svg class="mini-env-flap" viewBox="0 0 80 22" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+			<polygon points="0,0 80,0 40,22" fill="#d4c9ae" stroke="#a89880" stroke-width="1.5" stroke-linejoin="round"/>
+		</svg>
 		<div class="mini-env-body">
 			<span class="mini-env-label">매일함</span>
 		</div>
@@ -348,8 +345,8 @@
 				>✕</button>
 			</div>
 			<p class="lc-body">
-				매일 아침, 오늘의 질문을 받겠습니다.<br />
-				GitHub Discussion에서 함께 답을 만들어가겠습니다.
+				매일 아침, 질문 하나가 도착합니다.<br />
+				아는 것 같았는데 막히는 것들, 함께 생각해봐요.
 			</p>
 		</div>
 
@@ -367,7 +364,7 @@
 		</div>
 
 		<div class="lc-hint">
-			<span class="lc-hint-text">잡아서 반짝이는 칸에 넣어주세요</span>
+			<span class="lc-hint-text">편지를 넣어 구독하세요</span>
 			<span class="lc-hint-arrow">✦</span>
 		</div>
 	{/if}
@@ -507,6 +504,19 @@
 		animation: blink 2s ease-in-out infinite;
 	}
 
+	.display-sent {
+		background: linear-gradient(135deg, #1a2e1a, #0f1f0f);
+	}
+	.display-label-sent {
+		font-size: 0.8rem;
+		letter-spacing: 0.12em;
+		animation: fadeIn 0.6s ease-out;
+	}
+	.display-dot-sent {
+		box-shadow: 0 0 10px rgba(144,238,144,1);
+		animation: blink 0.8s ease-in-out infinite;
+	}
+
 	.letter-box {
 		background: linear-gradient(175deg, #dadadf 0%, #cacacf 60%, #c0c0c8 100%);
 	}
@@ -618,14 +628,6 @@
 		transform: translateX(-48%) rotate(-1deg) scale(1.03);
 		filter: drop-shadow(0 -4px 10px rgba(0,0,0,0.3));
 	}
-	.sent-peek {
-		cursor: default;
-		bottom: calc(50% - 6px);
-	}
-	.sent-peek:hover {
-		bottom: calc(50% - 6px);
-		transform: translateX(-48%) rotate(-1deg);
-	}
 
 	.envelope-flap {
 		width: 100%;
@@ -666,7 +668,8 @@
 	}
 
 	.service-main {
-		font-family: 'DM Serif Display', serif;
+		font-family: 'DM Sans', sans-serif;
+		font-weight: 500;
 		font-size: 0.95rem;
 		color: #444;
 		white-space: nowrap;
@@ -859,7 +862,11 @@
 		color: #555;
 		letter-spacing: 0.05em;
 		font-family: 'DM Sans', sans-serif;
-		animation: fadeIn 0.5s ease-out;
+		opacity: 0;
+		transition: opacity 0.5s ease-out;
+	}
+	.sent-notice-visible {
+		opacity: 1;
 	}
 
 	/* ── 드래그 편지 카드 ── */
@@ -888,21 +895,16 @@
 
 	/* 미니 봉투 */
 	.mini-env-flap {
-		width: 0;
-		height: 0;
-		border-left: 40px solid transparent;
-		border-right: 40px solid transparent;
-		border-bottom: 22px solid #d4c9ae;
-		position: relative;
-		z-index: 2;
+		width: 100%;
+		height: 22px;
 		flex-shrink: 0;
+		display: block;
 	}
 
 	.mini-env-body {
 		flex: 1;
-		background: #f0e8d2;
-		border: 1px solid #d4c9ae;
-		border-top: none;
+		background: transparent;
+		border: none;
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -915,7 +917,7 @@
 		font-family: 'DM Sans', sans-serif;
 	}
 
-	/* 미니 봉투 일 때 카드 배경선 제거 */
+	/* 미니 봉투일 때 카드 배경선 제거 */
 	.letter-card:has(.mini-env-flap) {
 		background-image: none;
 		display: flex;

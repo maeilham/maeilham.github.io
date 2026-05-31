@@ -11,6 +11,9 @@
 	const ENV_W  = 80;
 	const ENV_H  = 62;
 
+	let windowWidth = $state(typeof window !== "undefined" ? window.innerWidth : 800);
+	let cardW = $derived(Math.min(CARD_W, windowWidth - 32));
+
 	let dragX = $state(0);
 	let dragY = $state(0);
 	let snapBack = $state(false);
@@ -20,13 +23,10 @@
 	let isDragging = $derived(phase === "dragging" || phase === "inserting");
 
 	let letterCardEl: HTMLElement | null = null;
-	let dropBoxEl: HTMLElement | null = null;
-
-	const LETTER_BOX  = 7;
-	const DROP_BOX    = 10;
-	const DISPLAY_POS = 9;
-	const SKIP_POS    = 16;
-	const STACK_BOX   = 3;  // 1행 3열 — 지난 질문 묶음
+	let dropBoxDesktop = $state<HTMLElement | null>(null);
+	let dropBoxMobile  = $state<HTMLElement | null>(null);
+	let isMobile = $derived(windowWidth < 540);
+	let dropBoxEl = $derived(isMobile ? dropBoxMobile : dropBoxDesktop);
 
 	type Letter = { tag: string; date: string; question: string; preview: string };
 	const letters: Letter[] = [
@@ -40,29 +40,41 @@
 	let stackIdx  = $state(0);
 	const stackLetter = $derived(letters[stackIdx]);
 
-	type Item = number | "display" | "letter" | "drop";
-	const items: Item[] = [];
-	for (let i = 1; i <= 35; i++) {
-		if (i === SKIP_POS) continue;
-		if (i === DISPLAY_POS) { items.push("display"); continue; }
-		if (i === LETTER_BOX)  { items.push("letter");  continue; }
-		if (i === DROP_BOX)    { items.push("drop");    continue; }
-		items.push(i);
+	type Item = number | "display" | "letter" | "drop" | "stack";
+
+	function buildItems(total: number, display: number, skip: number, letter: number, drop: number, stack: number): Item[] {
+		const result: Item[] = [];
+		for (let i = 1; i <= total; i++) {
+			if (i === skip)    continue;
+			if (i === display) { result.push("display"); continue; }
+			if (i === letter)  { result.push("letter");  continue; }
+			if (i === drop)    { result.push("drop");    continue; }
+			if (i === stack)   { result.push("stack");   continue; }
+			result.push(i);
+		}
+		return result;
 	}
 
+	// Row1: STACK | LETTER | DROP | plain
+	// Row2: DISP  | plain  | plain| plain  ← display spans rows 2-3
+	// Row3: SKIP  | plain  | plain| plain
+	const mobileItems  = buildItems(12, 1, 8, 4, 5, 2);
+	// 7열 × 5행 데스크톱
+	const desktopItems = buildItems(35, 9, 16, 7, 10, 3);
+
 	function openCard() {
-		dragX = window.innerWidth / 2 - CARD_W / 2;
+		dragX = window.innerWidth / 2 - cardW / 2;
 		dragY = window.innerHeight / 2 - 160;
 		errorMsg = "";
 		snapBack = false;
 		phase = "writing";
 	}
 
-	function startDrag(e: MouseEvent) {
+	function startDrag(e: PointerEvent) {
 		if (phase === "inserting" || phase === "sent") return;
 		e.preventDefault();
 		if (!letterCardEl) return;
-		// 봉투 크기로 전환, 커서가 봉투 중앙에 오도록
+		letterCardEl.setPointerCapture(e.pointerId);
 		grabOffsetX = ENV_W / 2;
 		grabOffsetY = ENV_H / 2;
 		dragX = e.clientX - ENV_W / 2;
@@ -71,7 +83,7 @@
 		phase = "dragging";
 	}
 
-	function onMouseMove(e: MouseEvent) {
+	function onMove(e: PointerEvent) {
 		if (phase !== "dragging") return;
 		dragX = e.clientX - grabOffsetX;
 		dragY = e.clientY - grabOffsetY;
@@ -83,7 +95,7 @@
 		}
 	}
 
-	async function onMouseUp() {
+	async function onUp() {
 		if (phase !== "dragging") return;
 
 		if (overSlot) {
@@ -99,9 +111,15 @@
 		overSlot = false;
 	}
 
+	function onCancel() {
+		if (phase !== "dragging") return;
+		doSnapBack();
+		overSlot = false;
+	}
+
 	function doSnapBack() {
 		snapBack = true;
-		dragX = window.innerWidth / 2 - CARD_W / 2;
+		dragX = window.innerWidth / 2 - cardW / 2;
 		dragY = window.innerHeight / 2 - 160;
 		phase = "writing";
 		setTimeout(() => { snapBack = false; }, 500);
@@ -142,7 +160,7 @@
 
 	let cardStyle = $derived((() => {
 		if (phase === "writing") {
-			const base = `position:fixed;left:${dragX}px;top:${dragY}px;width:${CARD_W}px;`;
+			const base = `position:fixed;left:${dragX}px;top:${dragY}px;width:${cardW}px;`;
 			return base + (snapBack
 				? "transition:left 0.45s cubic-bezier(0.34,1.3,0.64,1),top 0.45s cubic-bezier(0.34,1.3,0.64,1);"
 				: "");
@@ -153,11 +171,11 @@
 		if (phase === "inserting") {
 			return `position:fixed;left:${dragX}px;top:${dragY}px;width:${ENV_W}px;height:${ENV_H}px;transform:scale(0.04) rotate(5deg);opacity:0;transition:transform 0.6s cubic-bezier(0.6,0,1,0.5),opacity 0.35s 0.2s,left 0.6s cubic-bezier(0.6,0,1,0.5),top 0.6s cubic-bezier(0.6,0,1,0.5);`;
 		}
-		return `position:fixed;left:${dragX}px;top:${dragY}px;width:${CARD_W}px;`;
+		return `position:fixed;left:${dragX}px;top:${dragY}px;width:${cardW}px;`;
 	})());
 </script>
 
-<svelte:window onmousemove={onMouseMove} onmouseup={onMouseUp} />
+<svelte:window onresize={() => windowWidth = window.innerWidth} />
 
 <svelte:head>
 	<title>매일함</title>
@@ -169,78 +187,89 @@
 		<span class="title-text">SMART POST BOX</span>
 	</div>
 
-	<div class="locker-grid">
-		{#each items as item}
-
+	<!-- 데스크톱 그리드 (CSS로 모바일에서 숨김) -->
+	<div class="locker-grid desktop-grid">
+		{#each desktopItems as item}
 			{#if item === "display"}
-				<div class="box display-box">
-					<div class="display-screen">
-						<p class="display-label">매일함</p>
-						<p class="display-sub">매일함으로, 매일 함.</p>
-						<div class="display-dot"></div>
-					</div>
-				</div>
-
+				<div class="box display-box"><div class="display-screen">
+					<p class="display-label">매일함</p>
+					<p class="display-sub">매일함으로, 매일 함.</p>
+					<div class="display-dot"></div>
+				</div></div>
 			{:else if item === "letter"}
 				<div class="box letter-box">
 					{#if phase !== "sent"}
 						<button class="letter-peek" onclick={openCard} aria-label="편지 열기">
 							<div class="envelope-flap"></div>
-							<div class="envelope-body">
-								<span class="envelope-label">매일함</span>
-							</div>
+							<div class="envelope-body"><span class="envelope-label">매일함</span></div>
 						</button>
 					{:else}
 						<div class="letter-peek sent-peek">
 							<div class="envelope-flap flap-closed"></div>
-							<div class="envelope-body">
-								<span class="envelope-label">✓</span>
-							</div>
+							<div class="envelope-body"><span class="envelope-label">✓</span></div>
 						</div>
 					{/if}
-					<div class="slot"></div>
-					<div class="lock"></div>
+					<div class="slot"></div><div class="lock"></div>
 				</div>
-
 			{:else if item === "drop"}
-				<div
-					class="box drop-box"
-					class:drop-ready={overSlot && isDragging}
-					class:drop-calling={isDragging && !overSlot}
-					bind:this={dropBoxEl}
-				>
+				<div class="box drop-box" class:drop-ready={overSlot && isDragging} class:drop-calling={isDragging && !overSlot} bind:this={dropBoxDesktop}>
 					<span class="drop-corner-label">이메일 넣는 곳</span>
 					<div class="slot" class:slot-active={overSlot && isDragging}></div>
 					<div class="lock"></div>
 				</div>
-
-			{:else if item === STACK_BOX}
-				<!-- 지난 질문 묶음 -->
+			{:else if item === "stack"}
 				<div class="box stack-box" onclick={() => { stackOpen = true; stackIdx = 0; }}>
-					<!-- 겹친 편지들 -->
-					<div class="stack-env se-back">
-						<div class="envelope-flap"></div>
-						<div class="envelope-body"><span class="envelope-label"></span></div>
-					</div>
-					<div class="stack-env se-mid">
-						<div class="envelope-flap"></div>
-						<div class="envelope-body"><span class="envelope-label"></span></div>
-					</div>
-					<div class="stack-env se-front">
-						<div class="envelope-flap"></div>
-						<div class="envelope-body"><span class="envelope-label">지난 질문</span></div>
-					</div>
-					<div class="slot"></div>
-					<div class="lock"></div>
+					<div class="stack-env se-back"><div class="envelope-flap"></div><div class="envelope-body"><span class="envelope-label"></span></div></div>
+					<div class="stack-env se-mid"><div class="envelope-flap"></div><div class="envelope-body"><span class="envelope-label"></span></div></div>
+					<div class="stack-env se-front"><div class="envelope-flap"></div><div class="envelope-body"><span class="envelope-label">지난 질문</span></div></div>
+					<div class="slot"></div><div class="lock"></div>
 				</div>
-
 			{:else}
-				<div class="box">
-					<div class="slot"></div>
+				<div class="box"><div class="slot"></div><div class="lock"></div></div>
+			{/if}
+		{/each}
+	</div>
+
+	<!-- 모바일 그리드 (CSS로 데스크톱에서 숨김) -->
+	<div class="locker-grid mobile-grid">
+		{#each mobileItems as item}
+			{#if item === "display"}
+				<div class="box display-box"><div class="display-screen">
+					<p class="display-label">매일함</p>
+					<p class="display-sub">매일함으로, 매일 함.</p>
+					<div class="display-dot"></div>
+				</div></div>
+			{:else if item === "letter"}
+				<div class="box letter-box">
+					{#if phase !== "sent"}
+						<button class="letter-peek" onclick={openCard} aria-label="편지 열기">
+							<div class="envelope-flap"></div>
+							<div class="envelope-body"><span class="envelope-label">매일함</span></div>
+						</button>
+					{:else}
+						<div class="letter-peek sent-peek">
+							<div class="envelope-flap flap-closed"></div>
+							<div class="envelope-body"><span class="envelope-label">✓</span></div>
+						</div>
+					{/if}
+					<div class="slot"></div><div class="lock"></div>
+				</div>
+			{:else if item === "drop"}
+				<div class="box drop-box" class:drop-ready={overSlot && isDragging} class:drop-calling={isDragging && !overSlot} bind:this={dropBoxMobile}>
+					<span class="drop-corner-label">이메일 넣는 곳</span>
+					<div class="slot" class:slot-active={overSlot && isDragging}></div>
 					<div class="lock"></div>
 				</div>
+			{:else if item === "stack"}
+				<div class="box stack-box" onclick={() => { stackOpen = true; stackIdx = 0; }}>
+					<div class="stack-env se-back"><div class="envelope-flap"></div><div class="envelope-body"><span class="envelope-label"></span></div></div>
+					<div class="stack-env se-mid"><div class="envelope-flap"></div><div class="envelope-body"><span class="envelope-label"></span></div></div>
+					<div class="stack-env se-front"><div class="envelope-flap"></div><div class="envelope-body"><span class="envelope-label">지난 질문</span></div></div>
+					<div class="slot"></div><div class="lock"></div>
+				</div>
+			{:else}
+				<div class="box"><div class="slot"></div><div class="lock"></div></div>
 			{/if}
-
 		{/each}
 	</div>
 
@@ -257,7 +286,7 @@
 
 <!-- 지난 질문 모달 -->
 {#if stackOpen}
-<div class="dim" onclick={() => stackOpen = false}></div>
+<button class="dim" title="Close" onclick={() => stackOpen = false}></button>
 <div class="sample-modal">
 	<button class="sm-close" onclick={() => stackOpen = false}>✕</button>
 
@@ -295,7 +324,10 @@
 	class:is-over={overSlot && isDragging}
 	style={cardStyle}
 	bind:this={letterCardEl}
-	onmousedown={startDrag}
+	onpointerdown={startDrag}
+	onpointermove={onMove}
+	onpointerup={onUp}
+	onpointercancel={onCancel}
 >
 	{#if isDragging}
 		<!-- 드래그 중: 미니 봉투 모양 -->
@@ -311,7 +343,7 @@
 				<span class="lc-date">{new Date().toLocaleDateString("ko-KR", { year:"numeric", month:"long", day:"numeric" })}</span>
 				<button
 					class="lc-close"
-					onmousedown={(e) => e.stopPropagation()}
+					onpointerdown={(e) => e.stopPropagation()}
 					onclick={() => phase = "idle"}
 				>✕</button>
 			</div>
@@ -321,7 +353,7 @@
 			</p>
 		</div>
 
-		<div class="lc-inputs" onmousedown={(e) => e.stopPropagation()}>
+		<div class="lc-inputs" onpointerdown={(e) => e.stopPropagation()}>
 			<span class="lc-from-label">From.</span>
 			<input
 				type="email"
@@ -376,7 +408,6 @@
 
 	.locker-grid {
 		display: grid;
-		grid-template-columns: repeat(7, 1fr);
 		gap: 3px;
 		padding: 10px;
 		background: #b0b0b0;
@@ -385,6 +416,23 @@
 		box-shadow: 0 4px 24px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.3);
 		width: 100%;
 		max-width: 800px;
+	}
+
+	/* 데스크톱: 7열, 모바일에서 숨김 */
+	.desktop-grid {
+		grid-template-columns: repeat(7, 1fr);
+	}
+	@media (max-width: 539px) {
+		.desktop-grid { display: none; }
+	}
+
+	/* 모바일: 4열, 데스크톱에서 숨김 */
+	.mobile-grid {
+		display: none;
+		grid-template-columns: repeat(4, 1fr);
+	}
+	@media (max-width: 539px) {
+		.mobile-grid { display: grid; }
 	}
 
 	.box {
@@ -995,5 +1043,22 @@
 	@keyframes bounce {
 		0%, 100% { transform: translateY(0); }
 		50% { transform: translateY(5px); }
+	}
+
+	/* ── 모바일 ── */
+	.letter-card { touch-action: none; }
+
+	@media (max-width: 539px) {
+		.wall { padding: 20px 8px; }
+		.mobile-grid { gap: 2px; padding: 6px; }
+		/* .mobile-grid .box { height: 64px; } */
+
+		.service-desc { flex-direction: column; gap: 8px; }
+		.service-sub {
+			border-left: none;
+			padding-left: 0;
+			border-top: 1px solid #bbb;
+			padding-top: 8px;
+		}
 	}
 </style>

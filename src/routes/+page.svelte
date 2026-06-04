@@ -28,7 +28,7 @@
 			{ text: "——", sep: true },
 			{ text: "내일부터 매일 아침 질문이 도착합니다" },
 			{ text: "——", sep: true },
-			{ text: "GitHub Discussion에서 함께 답을 만들어가요" },
+			{ text: "함께 답을 만들어가요" },
 			{ text: "——", sep: true },
 		],
 		unsubscribed: [
@@ -50,6 +50,8 @@
 	};
 	const tickerItems = $derived(urlStatus && statusTicker[urlStatus] ? statusTicker[urlStatus] : defaultTicker);
 	const tickerHighlight = $derived(urlStatus === "confirmed");
+	const tickerWarning = $derived(urlStatus === "invalid");
+	const tickerStatic = $derived(urlStatus === "confirmed");
 
 	type Phase = "idle" | "writing" | "dragging" | "inserting" | "sent" | "error";
 	let phase = $state<Phase>("idle");
@@ -238,12 +240,12 @@
 	</div>
 
 	<!-- 전광판 -->
-	<div class="ticker-wrap" class:ticker-highlight={tickerHighlight}>
+	<div class="ticker-wrap" class:ticker-highlight={tickerHighlight} class:ticker-warning={tickerWarning} class:ticker-static={tickerStatic}>
 		<div class="ticker-track">
-			{#each Array(2) as _}
+			{#each tickerStatic ? [1] : Array(2) as _}
 				{#each tickerItems as item}
 					{#if item.sep}
-						<span class="ticker-sep">{item.text}</span>
+						{#if !tickerStatic}<span class="ticker-sep">{item.text}</span>{/if}
 					{:else}
 						<span class="ticker-item">{item.text}</span>
 					{/if}
@@ -499,6 +501,29 @@
 	.ticker-highlight .ticker-item {
 		color: #b8f0b8;
 		text-shadow: 0 0 10px rgba(144,238,144,0.8);
+	}
+
+	.ticker-warning .ticker-item {
+		color: #e19e40;
+		text-shadow: 0 0 10px rgba(255,140,0,0.8);
+	}
+	.ticker-warning .ticker-sep {
+		color: #a0520a;
+	}
+
+	/* 정지 + 번쩍임 */
+	.ticker-static .ticker-track {
+		animation: none;
+		width: 100%;
+		justify-content: center;
+	}
+	.ticker-static .ticker-item {
+		animation: flash 1.2s ease-in-out infinite;
+	}
+
+	@keyframes flash {
+		0%, 100% { opacity: 1; text-shadow: 0 0 10px rgba(144,238,144,0.9); }
+		50%       { opacity: 0.25; text-shadow: none; }
 	}
 
 	@keyframes ticker {

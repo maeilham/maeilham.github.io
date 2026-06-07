@@ -53,6 +53,23 @@
 	const tickerWarning = $derived(urlStatus === "invalid");
 	const tickerStatic = $derived(urlStatus === "confirmed");
 
+	// 구독 해지 모달
+	const urlAction = $derived($page.url.searchParams.get("action"));
+	const urlToken  = $derived($page.url.searchParams.get("token"));
+	const showUnsubscribeModal = $derived(urlAction === "unsubscribe" && !!urlToken);
+	let unsubscribeLoading = $state(false);
+
+	async function confirmUnsubscribe() {
+		if (!urlToken) return;
+		unsubscribeLoading = true;
+		const res = await fetch(`${API}/api/unsubscribe?token=${urlToken}`, { method: "POST" }).catch(() => null);
+		if (res?.ok) {
+			window.location.href = "/?status=unsubscribed";
+		} else {
+			window.location.href = "/?status=invalid";
+		}
+	}
+
 	type Phase = "idle" | "writing" | "dragging" | "inserting" | "sent" | "error";
 	let phase = $state<Phase>("idle");
 	let email = $state("");
@@ -386,6 +403,26 @@
 </div>
 {/if}
 
+<!-- 구독 해지 확인 모달 -->
+{#if showUnsubscribeModal}
+<button class="dim" title="Close" onclick={() => window.location.href = "/"}></button>
+<div class="sample-modal">
+	<button class="sm-close" onclick={() => window.location.href = "/"}>✕</button>
+	<div class="sm-header">
+		<span class="sm-from">From. 매일함</span>
+	</div>
+	<h2 class="sm-question">구독을 해지하시겠어요?</h2>
+	<hr class="sm-rule" />
+	<p class="sm-preview">해지 후에도 언제든 다시 구독할 수 있습니다.</p>
+	<div class="sm-nav">
+		<button class="sm-nav-btn" onclick={() => window.location.href = "/"}>취소</button>
+	</div>
+	<button class="sm-cta" onclick={confirmUnsubscribe} disabled={unsubscribeLoading}>
+		{unsubscribeLoading ? "처리 중..." : "네, 해지할게요"}
+	</button>
+</div>
+{/if}
+
 <!-- 드래그 가능한 편지 카드 -->
 {#if phase !== "idle" && phase !== "sent"}
 <div
@@ -404,7 +441,7 @@
 	{#if isDragging}
 		<!-- 드래그 중: 미니 봉투 -->
 		<svg class="mini-env-flap" viewBox="0 0 80 22" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
-			<polygon points="0,0 80,0 40,22" fill="#d4c9ae" stroke="#a89880" stroke-width="1.5" stroke-linejoin="round"/>
+			<polygon points="0,0 80,0 40,22" fill="#ddd8cf" stroke="#c0bab0" stroke-width="1.5" stroke-linejoin="round"/>
 		</svg>
 		<div class="mini-env-body">
 			<span class="mini-env-label">매일함</span>
@@ -787,7 +824,7 @@
 		height: 0;
 		border-left: 50% solid transparent;
 		border-right: 50% solid transparent;
-		border-bottom: 18px solid #d4c9ae;
+		border-bottom: 18px solid #ddd8cf;
 	}
 	.flap-closed {
 		border-bottom-color: #c8bfae;
@@ -796,8 +833,8 @@
 	.envelope-body {
 		width: 100%;
 		height: 38px;
-		background: #f0e8d2;
-		border: 1px solid #d4c9ae;
+		background: #f7f5f0;
+		border: 1px solid #ddd8cf;
 		border-top: none;
 		display: flex;
 		align-items: center;
@@ -878,7 +915,7 @@
 		left: 50%;
 		transform: translate(-50%, -50%);
 		width: min(460px, calc(100vw - 40px));
-		background: #F5EFDF;
+		background: #f8f6f2;
 		border: 1px solid #c8bfb0;
 		padding: 32px;
 		z-index: 50;
@@ -918,9 +955,9 @@
 	}
 
 	.sm-question {
-		font-family: 'DM Serif Display', serif;
+		font-family: 'DM Sans', sans-serif;
 		font-size: 1.3rem;
-		font-weight: 400;
+		font-weight: 600;
 		line-height: 1.4;
 		color: #1a1108;
 		margin-bottom: 16px;
@@ -956,7 +993,7 @@
 		width: 100%;
 		padding: 12px;
 		background: #1a1108;
-		color: #F5EFDF;
+		color: #f8f6f2;
 		font-size: 0.85rem;
 		font-family: 'DM Sans', sans-serif;
 		border: none;
@@ -1025,8 +1062,8 @@
 	/* ── 드래그 편지 카드 ── */
 	.letter-card {
 		z-index: 100;
-		background: #F5EFDF;
-		border: 1px solid #d4c9ae;
+		background: #f8f6f2;
+		border: 1px solid #ddd8cf;
 		box-shadow: 4px 10px 40px rgba(0,0,0,0.28);
 		user-select: none;
 		cursor: grab;

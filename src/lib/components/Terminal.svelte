@@ -21,13 +21,13 @@
 
 	// ── 초기화 ────────────────────────────────────────────────────────────────
 	onMount(() => {
-		// 초기 위치: bottom-right
-		const top  = window.innerHeight - 482 - 12;
-		const left = window.innerWidth  - 705 - 12;
+		// 초기 위치: 화면 중앙
+		const top  = Math.max(0, (window.innerHeight - 482) / 2);
+		const left = Math.max(0, (window.innerWidth  - 705) / 2);
 		containerEl.style.top    = `${top}px`;
 		containerEl.style.left   = `${left}px`;
-		containerEl.style.right  = '12px';
-		containerEl.style.bottom = '12px';
+		containerEl.style.right  = 'auto';
+		containerEl.style.bottom = 'auto';
 
 		// scale-in 애니메이션
 		containerEl.style.transform = 'scale(0)';
@@ -97,10 +97,14 @@
 			containerEl.setAttribute('data-mode', 'docked');
 			mode = 'docked';
 		} else {
+			const top  = Math.max(0, (window.innerHeight - 482) / 2);
+			const left = Math.max(0, (window.innerWidth  - 705) / 2);
 			containerEl.style.width  = '705px';
 			containerEl.style.height = '482px';
-			containerEl.style.right  = '12px';
-			containerEl.style.bottom = '12px';
+			containerEl.style.top    = `${top}px`;
+			containerEl.style.left   = `${left}px`;
+			containerEl.style.right  = 'auto';
+			containerEl.style.bottom = 'auto';
 			containerEl.setAttribute('data-mode', 'floating');
 			mode = 'floating';
 		}
@@ -192,7 +196,7 @@
 		backdrop-filter: blur(12px);
 		-webkit-backdrop-filter: blur(12px);
 		box-shadow: 0 4px 30px rgba(0, 0, 0, 0.15);
-		transform-origin: bottom right;
+		transform-origin: center;
 		transition: transform 0.25s cubic-bezier(0.34, 1.2, 0.64, 1),
 		            width   0.3s  cubic-bezier(0.4, 0, 0.2, 1),
 		            height  0.3s  cubic-bezier(0.4, 0, 0.2, 1),

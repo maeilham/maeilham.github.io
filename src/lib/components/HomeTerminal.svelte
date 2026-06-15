@@ -7,7 +7,7 @@
 	const Terminal = (XtermPkg as any).Terminal ?? (XtermPkg as any).default?.Terminal;
 	const FitAddon  = (FitPkg as any).FitAddon  ?? (FitPkg as any).default?.FitAddon;
 
-	let { action = '', token = '' }: { action?: string; token?: string } = $props();
+	let { action = '', token = '', status = '' }: { action?: string; token?: string; status?: string } = $props();
 
 	const API_WS = (import.meta.env.VITE_API_URL ?? 'http://localhost:8080')
 		.replace(/^http/, 'ws');
@@ -53,6 +53,7 @@
 		const params = new URLSearchParams();
 		if (action) params.set('action', action);
 		if (token) params.set('token', token);
+		if (status) params.set('status', status);
 		const query = params.toString() ? `?${params}` : '';
 		ws = new WebSocket(`${API_WS}/ws/terminal${query}`);
 		ws.binaryType = 'arraybuffer';

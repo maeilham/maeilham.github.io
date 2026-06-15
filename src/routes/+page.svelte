@@ -1,11 +1,21 @@
 <script lang="ts">
+	import { onMount } from "svelte";
 	import { page } from "$app/stores";
 	import HomeTerminal from "$lib/components/HomeTerminal.svelte";
 
 	// ── URL 상태 ──────────────────────────────────────────────────────────────
 	const urlAction = $derived($page.url.searchParams.get("action"));
 	const urlToken  = $derived($page.url.searchParams.get("token"));
+	const urlStatus = $derived($page.url.searchParams.get("status"));
 	const showUnsubscribeModal = $derived(urlAction === "unsubscribe" && !!urlToken);
+
+	onMount(() => {
+		if ($page.url.searchParams.has("status")) {
+			const clean = new URL($page.url);
+			clean.searchParams.delete("status");
+			history.replaceState(history.state, "", clean.pathname + (clean.search || ""));
+		}
+	});
 
 </script>
 
@@ -22,7 +32,10 @@
 	<main class="content">
 
 		<div class="intro">
-			{#if showUnsubscribeModal}
+			{#if urlStatus === 'confirmed'}
+				<h1 class="intro-title">구독이<br>완료됐습니다.</h1>
+				<p class="intro-desc">내일부터 매일 아침 질문이 도착합니다.</p>
+			{:else if showUnsubscribeModal}
 				<p class="unsub-label">구독 해지</p>
 				<h1 class="intro-title">구독을 취소할게요.</h1>
 				<p class="intro-desc">터미널에서 확인해주세요.</p>
@@ -36,7 +49,7 @@
 		</div>
 
 		<div class="terminal-wrap">
-			<HomeTerminal action={urlAction ?? ''} token={urlToken ?? ''} />
+			<HomeTerminal action={urlAction ?? ''} token={urlToken ?? ''} status={urlStatus ?? ''} />
 		</div>
 
 	</main>

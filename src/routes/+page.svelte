@@ -76,13 +76,13 @@
 		min-height: 100vh;
 		display: flex;
 		flex-direction: column;
-		max-width: 600px;
+		width: 640px;
 		margin: 0 auto;
-		padding: 0 24px;
+		padding: 0;
 	}
 
 	.header {
-		padding: 48px 0 64px;
+		padding: 48px 24px 64px;
 	}
 	.logo {
 		font-size: 16px;
@@ -102,6 +102,7 @@
 		display: flex;
 		flex-direction: column;
 		gap: 16px;
+		padding: 0 24px;
 	}
 	.intro-title {
 		font-size: 28px;
@@ -135,7 +136,7 @@
 	}
 
 	.footer {
-		padding: 48px 0 36px;
+		padding: 48px 24px 36px;
 		font-size: 13px;
 		color: #8b95a1;
 		display: flex;

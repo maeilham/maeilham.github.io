@@ -2,10 +2,12 @@
 	import { onMount, onDestroy } from 'svelte';
 	import * as XtermPkg from '@xterm/xterm';
 	import * as FitPkg from '@xterm/addon-fit';
+	import * as WebLinksPkg from '@xterm/addon-web-links';
 	import '@xterm/xterm/css/xterm.css';
 
-	const Terminal = (XtermPkg as any).Terminal ?? (XtermPkg as any).default?.Terminal;
-	const FitAddon  = (FitPkg as any).FitAddon  ?? (FitPkg as any).default?.FitAddon;
+	const Terminal    = (XtermPkg as any).Terminal ?? (XtermPkg as any).default?.Terminal;
+	const FitAddon    = (FitPkg as any).FitAddon   ?? (FitPkg as any).default?.FitAddon;
+	const WebLinksAddon = (WebLinksPkg as any).WebLinksAddon ?? (WebLinksPkg as any).default?.WebLinksAddon;
 
 	let { action = '', token = '', status = '' }: { action?: string; token?: string; status?: string } = $props();
 
@@ -34,6 +36,7 @@
 
 		fitAddon = new FitAddon();
 		term.loadAddon(fitAddon);
+		term.loadAddon(new WebLinksAddon());
 		term.open(termEl);
 		fitAddon.fit();
 
@@ -81,7 +84,8 @@
 	.term-wrap {
 		overflow: hidden;
 		background: #1e1e1e;
-		aspect-ratio: 4 / 3;
+		width: 640px;
+		height: 480px;
 		padding: 4px;
 	}
 

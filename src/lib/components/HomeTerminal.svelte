@@ -39,6 +39,7 @@
 		term.loadAddon(new WebLinksAddon());
 		term.open(termEl);
 		fitAddon.fit();
+		term.focus();
 
 		connectWS();
 

@@ -39,20 +39,41 @@ export class ApiError extends Error {
 	}
 }
 
+// 서버의 오류 응답({"error": "..."})을 ApiError로 바꾼다. 본문이 JSON이 아니면 상태 코드 메시지를 쓴다.
+async function toApiError(res: Response): Promise<ApiError> {
+	let message = `HTTP ${res.status}`;
+	try {
+		const body = await res.json();
+		if (typeof body?.error === 'string') message = body.error;
+	} catch {
+		// JSON이 아님
+	}
+	return new ApiError(res.status, message);
+}
+
 export async function getContent(repo: string, id: string, signal?: AbortSignal): Promise<ContentDetail> {
 	const url = `${API_URL}/api/contents/${encodeURIComponent(repo)}/${encodeURIComponent(id)}`;
 	const res = await fetch(url, { signal });
-	if (!res.ok) {
-		let message = `HTTP ${res.status}`;
-		try {
-			const body = await res.json();
-			if (typeof body?.error === 'string') message = body.error;
-		} catch {
-			// 본문이 JSON이 아니면 상태 코드 메시지를 그대로 쓴다
-		}
-		throw new ApiError(res.status, message);
-	}
+	if (!res.ok) throw await toApiError(res);
 	return res.json();
+}
+
+// GET /api/today 응답의 항목. 오늘 발송해야 할 글 하나이고 본문은 없다(본문은 getContent로 따로 가져온다).
+export interface TodayItem {
+	repo: string;
+	repoName: string;
+	id: string;
+	title: string;
+	preview: string;
+	tags: string[];
+}
+
+// 보여줄 글이 하나도 없으면 서버가 404를 준다. 화면은 이를 "아직 없음"으로 처리한다.
+export async function getToday(signal?: AbortSignal): Promise<TodayItem> {
+	const res = await fetch(`${API_URL}/api/today`, { signal });
+	if (!res.ok) throw await toApiError(res);
+	const body = await res.json();
+	return body.item;
 }
 
 export function toReaderItem(c: ContentDetail): ReaderItem {

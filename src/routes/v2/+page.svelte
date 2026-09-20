@@ -1,5 +1,25 @@
 <script lang="ts">
-	import { today } from '$lib/v2/mock';
+	import { ApiError, getToday, type TodayItem } from '$lib/v2/api';
+	import { serviceDateLabel } from '$lib/v2/list';
+
+	type Today = { kind: 'loading' } | { kind: 'ready'; item: TodayItem } | { kind: 'none' } | { kind: 'error' };
+
+	let today = $state<Today>({ kind: 'loading' });
+	let attempt = $state(0); // 다시 시도를 누르면 올라가서 아래 effect가 다시 돈다
+
+	// 오늘의 질문을 서버에서 가져온다. 글이 하나도 없으면 서버가 404를 준다.
+	$effect(() => {
+		void attempt;
+		const ctrl = new AbortController();
+		today = { kind: 'loading' };
+		getToday(ctrl.signal)
+			.then((item) => (today = { kind: 'ready', item }))
+			.catch((e) => {
+				if (ctrl.signal.aborted) return;
+				today = e instanceof ApiError && e.status === 404 ? { kind: 'none' } : { kind: 'error' };
+			});
+		return () => ctrl.abort();
+	});
 
 	let email = $state('');
 	let submitted = $state(false);
@@ -22,12 +42,21 @@
 <main>
 	<!-- 슬로건 대신 실제 콘텐츠가 첫 화면. 서비스가 무엇인지 예시로 보여준다 -->
 	<article class="today" aria-labelledby="today-title">
-		<p class="today-meta">
-			오늘의 질문 · <span class="mono">{today.date.replaceAll('-', '.')}</span> · {today.category}
-		</p>
-		<h1 id="today-title" class="today-title">{today.title}</h1>
-		<p class="today-preview">{today.preview}</p>
-		<a class="today-cta" href="/v2/today">답 읽어보기 →</a>
+		{#if today.kind === 'ready'}
+			<p class="today-meta">
+				오늘의 질문 · <span class="mono">{serviceDateLabel()}</span> · {today.item.repoName}
+			</p>
+			<h1 id="today-title" class="today-title">{today.item.title}</h1>
+			<p class="today-preview">{today.item.preview}</p>
+			<a class="today-cta" href="/v2/today">답 읽어보기 →</a>
+		{:else if today.kind === 'loading'}
+			<p class="today-note" role="status">불러오는 중…</p>
+		{:else if today.kind === 'none'}
+			<h1 id="today-title" class="today-title">아직 오늘의 질문이 없어요</h1>
+		{:else}
+			<p class="today-note">오늘의 질문을 불러오지 못했어요.</p>
+			<button class="today-retry" onclick={() => attempt++}>다시 시도</button>
+		{/if}
 	</article>
 
 	<section class="subscribe" aria-labelledby="sub-title">
@@ -128,6 +157,23 @@
 	.today-cta:hover {
 		text-decoration: underline;
 		text-underline-offset: 3px;
+	}
+
+	.today-note {
+		margin: 0;
+		font-size: 16px;
+		color: var(--v2-sub);
+	}
+	.today-retry {
+		margin-top: 12px;
+		padding: 0;
+		border: 0;
+		background: none;
+		color: var(--v2-accent-text);
+		font: inherit;
+		font-size: 15px;
+		font-weight: 600;
+		cursor: pointer;
 	}
 
 	/* 구독 */

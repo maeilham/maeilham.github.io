@@ -19,3 +19,16 @@ export function dateLabel(iso?: string): string {
 	const pad = (n: number) => String(n).padStart(2, '0');
 	return `${pad(d.getMonth() + 1)}.${pad(d.getDate())}`;
 }
+
+// 서비스의 "오늘"을 "2026.09.20" 형태로. 서버가 하루를 나누는 시간대(MAEILHAM_TZ 기본 Asia/Seoul)와 같게,
+// 사용자의 기기 시간대와 무관하게 한국 시간으로 계산한다.
+export function serviceDateLabel(now: Date = new Date()): string {
+	const parts = new Intl.DateTimeFormat('en-CA', {
+		timeZone: 'Asia/Seoul',
+		year: 'numeric',
+		month: '2-digit',
+		day: '2-digit'
+	}).formatToParts(now);
+	const get = (type: string) => parts.find((p) => p.type === type)?.value ?? '';
+	return `${get('year')}.${get('month')}.${get('day')}`;
+}

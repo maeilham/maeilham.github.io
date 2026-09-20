@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { week } from '$lib/v2/mock';
 	import type { ReaderItem } from '$lib/v2/types';
 	import { renderMarkdown } from '$lib/v2/markdown';
 	import { auth } from '$lib/v2/auth.svelte';
@@ -85,15 +84,6 @@
 			<section class="complete" aria-label="오늘 완료">
 				<p class="complete-title">오늘은 여기까지</p>
 				<p class="complete-sub">내일 아침에 다음 질문이 도착해요.</p>
-				<ol class="week" aria-label="이번 주 기록">
-					{#each week as day (day.label)}
-						{@const state = day.state === 'today' ? 'done' : day.state}
-						<li class="day is-{state}">
-							<span class="cell" aria-hidden="true"></span>
-							<span class="day-label">{day.label}</span>
-						</li>
-					{/each}
-				</ol>
 			</section>
 		{/if}
 	{/if}
@@ -442,38 +432,8 @@
 		font-weight: 700;
 	}
 	.complete-sub {
-		margin: 6px 0 20px;
+		margin: 6px 0 0;
 		font-size: 14px;
-		color: var(--v2-mute);
-	}
-	.week {
-		display: flex;
-		justify-content: center;
-		gap: 8px;
-		margin: 0;
-		padding: 0;
-		list-style: none;
-	}
-	.day {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		gap: 6px;
-	}
-	.cell {
-		width: 28px;
-		height: 28px;
-		border-radius: 7px;
-		background: var(--v2-surface);
-	}
-	.day.is-done .cell {
-		background: var(--v2-accent);
-	}
-	.day.is-missed .cell {
-		background: var(--v2-line);
-	}
-	.day-label {
-		font-size: 11px;
 		color: var(--v2-mute);
 	}
 </style>

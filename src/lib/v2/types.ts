@@ -1,4 +1,4 @@
-// Reader가 그리는 콘텐츠 하나. mock과 서버 API 응답이 각자 이 모양으로 바꿔서 넘긴다.
+// Reader가 그리는 콘텐츠 하나. 서버 API 응답을 api.ts의 toReaderItem이 이 모양으로 바꿔서 넘긴다.
 // 서버에 아직 없는 값(발송일, 읽는 시간, 댓글 수, 노트, 읽음 여부)은 모두 선택 항목이며,
 // 없으면 화면에서 해당 부분을 그리지 않는다.
 export interface ReaderItem {

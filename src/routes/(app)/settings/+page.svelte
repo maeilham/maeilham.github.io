@@ -1,9 +1,12 @@
 <script lang="ts">
-	import { sources as initial } from '$lib/v2/mock';
-
+	// 이 화면은 아직 서버에 연결되지 않은 목 화면이다(탭에서 숨김). 아래 값은 모두 가짜다.
 	const email = 'me@example.com';
 
-	let sources = $state(initial.map((s) => ({ ...s })));
+	let sources = $state([
+		{ repo: 'maeilham/backend-ops', name: '백엔드 · 인프라', desc: '서버, 네트워크, 런타임', enabled: true },
+		{ repo: 'maeilham/frontend', name: '프론트엔드', desc: '브라우저, 렌더링, 프레임워크', enabled: true },
+		{ repo: 'maeilham/cs-basics', name: 'CS 기초', desc: 'OS, 자료구조, 네트워크 기본기', enabled: false }
+	]);
 	let confirming = $state(false);
 	let unsubscribed = $state(false);
 

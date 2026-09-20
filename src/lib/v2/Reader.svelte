@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { week, type Item } from '$lib/v2/mock';
 	import { renderMarkdown } from '$lib/v2/markdown';
+	import { auth } from '$lib/v2/auth.svelte';
 
 	let { item, isToday = false }: { item: Item; isToday?: boolean } = $props();
 
@@ -60,9 +61,13 @@
 			<a class="primary" href={item.discussionUrl} target="_blank" rel="noreferrer">
 				내 답 남기기
 			</a>
+			<!-- 비구독자에게만. 'unknown'(서버 확인 전)에는 그리지 않아 구독자에게 깜빡이지 않게 한다 -->
+			{#if auth.status === 'visitor'}
+				<a class="secondary" href="/v2/subscribe">매일 아침 메일로 받기</a>
+			{/if}
 		</section>
 
-		{#if isToday}
+		{#if auth.status === 'subscriber' && isToday}
 			<section class="complete" aria-label="오늘 완료">
 				<p class="complete-title">오늘은 여기까지</p>
 				<p class="complete-sub">내일 아침에 다음 질문이 도착해요.</p>
@@ -194,6 +199,29 @@
 	}
 	.reply .primary {
 		color: var(--v2-bg);
+	}
+	/* 보조 버튼: 주 CTA(내 답 남기기)와 구분되는 옅은 회색 */
+	.secondary {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 100%;
+		height: 52px;
+		margin-top: 10px;
+		border-radius: 14px;
+		background: var(--v2-surface);
+		color: var(--v2-ink);
+		font-size: 16px;
+		font-weight: 600;
+		text-decoration: none;
+		-webkit-tap-highlight-color: transparent;
+	}
+	.secondary:active {
+		opacity: 0.85;
+	}
+	.secondary:focus-visible {
+		outline: 3px solid var(--v2-border);
+		outline-offset: 2px;
 	}
 
 	/* 본문 */

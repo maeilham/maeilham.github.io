@@ -1,10 +1,15 @@
 <script lang="ts">
 	import { page } from '$app/state';
+	import { initAuth } from '$lib/v2/auth.svelte';
 
 	let { children } = $props();
 
+	// 클라이언트에서만 실행된다(localStorage). 주소가 바뀔 때 ?sub= 전환도 반영한다.
+	$effect(() => initAuth(page.url));
+
 	const path = $derived(page.url.pathname.replace(/\/$/, ''));
-	const isLanding = $derived(path === '/v2');
+	// 랜딩과 구독 폼은 탭 없이 단독 화면으로 보여준다.
+	const hideTabs = $derived(path === '/v2' || path === '/v2/subscribe');
 
 	const tabs = [
 		{ href: '/v2/today', label: '오늘', match: (p: string) => p === '/v2/today' },
@@ -17,10 +22,10 @@
 	<meta name="theme-color" content="#f6f5f2" />
 </svelte:head>
 
-<div class="v2" class:with-tabs={!isLanding}>
+<div class="v2" class:with-tabs={!hideTabs}>
 	{@render children()}
 
-	{#if !isLanding}
+	{#if !hideTabs}
 		<nav class="tabbar" aria-label="주요 메뉴">
 			{#each tabs as tab (tab.href)}
 				{@const active = tab.match(path)}

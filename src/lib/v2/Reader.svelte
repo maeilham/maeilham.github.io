@@ -1,10 +1,14 @@
 <script lang="ts">
 	import { week, type Item } from '$lib/v2/mock';
+	import { renderMarkdown } from '$lib/v2/markdown';
 
 	let { item, isToday = false }: { item: Item; isToday?: boolean } = $props();
 
 	let revealed = $state(false);
 	const open = $derived(revealed || item.read);
+	// 답을 펼칠 때만 렌더한다($derived는 읽힐 때 계산됨). 결과는 살균된 HTML이다.
+	const bodyHtml = $derived(renderMarkdown(item.body));
+	const notesHtml = $derived(item.notes ? renderMarkdown(item.notes) : '');
 </script>
 
 <article class="reader">
@@ -39,14 +43,14 @@
 		</div>
 	{:else}
 		<section class="prose">
-			{@html item.body}
+			{@html bodyHtml}
 		</section>
 
 		{#if item.notes}
 			<section class="notes" aria-labelledby="notes-title">
 				<h2 id="notes-title">커뮤니티 학습 노트</h2>
 				<p class="notes-sub">댓글 {item.comments}개를 AI가 읽고 정리했어요</p>
-				<div class="notes-body">{@html item.notes}</div>
+				<div class="notes-body">{@html notesHtml}</div>
 			</section>
 		{/if}
 
@@ -243,6 +247,102 @@
 	.prose :global(th) {
 		font-weight: 700;
 		background: var(--v2-surface);
+	}
+
+	/* 본문 - 마크다운이 만드는 나머지 요소 */
+	.prose {
+		overflow-wrap: anywhere; /* 긴 URL·토큰이 화면 밖으로 밀어내지 않게 */
+	}
+	.prose :global(h3) {
+		margin: 24px 0 8px;
+		font-size: 17px;
+		font-weight: 700;
+	}
+	.prose :global(ol) {
+		margin: 0 0 18px;
+		padding-left: 22px;
+		list-style: decimal;
+	}
+	.prose :global(blockquote) {
+		margin: 0 0 18px;
+		padding: 2px 0 2px 16px;
+		border-left: 3px solid var(--v2-border);
+		color: var(--v2-sub);
+	}
+	.prose :global(blockquote > :last-child) {
+		margin-bottom: 0;
+	}
+	.prose :global(hr) {
+		margin: 28px 0;
+		border: 0;
+		border-top: 1px solid var(--v2-line);
+	}
+	.prose :global(img) {
+		display: block;
+		max-width: 100%;
+		height: auto;
+		margin: 0 0 18px;
+		border-radius: 12px;
+	}
+	.prose :global(code) {
+		padding: 2px 6px;
+		border-radius: 6px;
+		background: var(--v2-surface);
+		font-family: var(--v2-mono);
+		font-size: 0.88em;
+	}
+	.prose :global(pre) {
+		margin: 0 0 18px;
+		padding: 14px 16px;
+		overflow-x: auto; /* 폰에서 긴 줄은 가로 스크롤 */
+		border-radius: 12px;
+		background: var(--v2-surface);
+		font-size: 13px;
+		line-height: 1.7;
+		word-break: normal;
+		overflow-wrap: normal;
+		-webkit-overflow-scrolling: touch;
+	}
+	.prose :global(pre code) {
+		padding: 0;
+		background: none;
+		font-size: inherit;
+	}
+
+	/* 코드 하이라이트 - 색은 v2 토큰만 쓴다(녹색/주황을 은근히) */
+	.prose :global(.hljs-comment),
+	.prose :global(.hljs-quote),
+	.prose :global(.hljs-meta) {
+		color: var(--v2-mute);
+		font-style: italic;
+	}
+	.prose :global(.hljs-keyword),
+	.prose :global(.hljs-selector-tag),
+	.prose :global(.hljs-doctag) {
+		color: var(--v2-accent-text);
+		font-weight: 600;
+	}
+	.prose :global(.hljs-string),
+	.prose :global(.hljs-regexp),
+	.prose :global(.hljs-number),
+	.prose :global(.hljs-literal),
+	.prose :global(.hljs-symbol),
+	.prose :global(.hljs-bullet) {
+		color: var(--v2-warm-text);
+	}
+	.prose :global(.hljs-title),
+	.prose :global(.hljs-section),
+	.prose :global(.hljs-built_in) {
+		color: var(--v2-ink);
+		font-weight: 600;
+	}
+	.prose :global(.hljs-attr),
+	.prose :global(.hljs-attribute),
+	.prose :global(.hljs-name),
+	.prose :global(.hljs-type),
+	.prose :global(.hljs-variable),
+	.prose :global(.hljs-params) {
+		color: var(--v2-sub);
 	}
 
 	/* 커뮤니티 노트 */

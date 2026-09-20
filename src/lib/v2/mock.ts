@@ -1,5 +1,11 @@
 // UI 검증용 mock 데이터. 실제 연동 시 서버 API 응답으로 교체한다.
-// body/notes는 실제로는 마크다운 → HTML 렌더 결과가 들어올 자리.
+// body/notes는 마크다운 원문이다(서버가 frontmatter를 뗀 본문을 내려주는 전제). 렌더는 markdown.ts가 한다.
+import body0001 from './mock/0001-browser-rendering.md?raw';
+import body0002 from './mock/0002-process-vs-thread.md?raw';
+import body0003 from './mock/0003-url-vs-uri.md?raw';
+import body0004 from './mock/0004-goroutine-vs-thread.md?raw';
+import body0005 from './mock/0005-k8s-service-types.md?raw';
+import body0006 from './mock/0006-scale-up-vs-out.md?raw';
 
 export type Category = '백엔드' | '프론트엔드' | 'CS';
 
@@ -37,25 +43,9 @@ export const items: Item[] = [
 		minutes: 3,
 		comments: 12,
 		discussionUrl: discussion(6),
-		body: `
-<p><strong>스케일업(Scale-up)</strong>은 기존 서버의 CPU·메모리·디스크를 증설하는 방식입니다. 구현이 단순하고 애플리케이션 변경 없이 성능을 올릴 수 있지만, 하드웨어 한계가 존재하고 단일 장애점(SPOF)이 생깁니다.</p>
-<p><strong>스케일아웃(Scale-out)</strong>은 서버를 여러 대로 수평 확장하는 방식입니다. 이론적으로 무한 확장이 가능하고 가용성이 높지만, 로드밸런서·세션 공유·데이터 일관성 같은 분산 환경 복잡도가 따라옵니다.</p>
-<h2>언제 무엇을 선택할까?</h2>
-<div class="table-wrap"><table>
-<thead><tr><th></th><th>스케일업</th><th>스케일아웃</th></tr></thead>
-<tbody>
-<tr><td>적합한 상황</td><td>DB, 레거시 앱처럼 수평 확장이 어려운 경우</td><td>웹 서버, API 서버처럼 무상태(stateless)한 경우</td></tr>
-<tr><td>비용</td><td>고사양 장비는 비용이 급격히 증가</td><td>저사양 장비 여러 대로 비용 분산 가능</td></tr>
-<tr><td>가용성</td><td>서버 1대 장애 = 서비스 중단</td><td>일부 서버 장애에도 서비스 유지 가능</td></tr>
-</tbody></table></div>
-<p>실무에서는 둘 중 하나만 선택하기보다 <strong>초기에 스케일업으로 빠르게 대응하고, 한계에 가까워지면 스케일아웃 구조로 전환</strong>하는 경우가 많습니다.</p>
-<h2>더 알아보기</h2>
-<ul>
-<li><a href="https://docs.aws.amazon.com/autoscaling/" target="_blank" rel="noreferrer">AWS Auto Scaling 문서</a></li>
-<li><a href="https://12factor.net/concurrency" target="_blank" rel="noreferrer">The Twelve-Factor App — Concurrency</a></li>
-</ul>`,
-		notes: `
-<p>DB는 읽기 복제본을 붙여 읽기부터 분산하고, 쓰기는 스케일업으로 버티다가 샤딩을 검토한다는 경험담이 많았음. 스케일아웃 전에 세션을 외부 저장소로 빼는 작업이 먼저라는 의견도 있었음.</p>`
+		body: body0006,
+		notes:
+			'DB는 읽기 복제본을 붙여 읽기부터 분산하고, 쓰기는 스케일업으로 버티다가 샤딩을 검토한다는 경험담이 많았음. 스케일아웃 전에 **세션을 외부 저장소로 빼는 작업**이 먼저라는 의견도 있었음.'
 	},
 	{
 		id: '0005-k8s-service-types',
@@ -71,14 +61,7 @@ export const items: Item[] = [
 		minutes: 4,
 		comments: 7,
 		discussionUrl: discussion(5),
-		body: `
-<p>Pod는 재시작되면 IP가 바뀌기 때문에, 고정된 접근 지점이 필요합니다. Service가 셀렉터로 Pod들을 묶어 하나의 안정적인 주소를 제공합니다.</p>
-<ul>
-<li><strong>ClusterIP</strong> — 클러스터 내부에서만 접근 가능한 기본 타입</li>
-<li><strong>NodePort</strong> — 각 노드의 특정 포트로 외부에서 접근</li>
-<li><strong>LoadBalancer</strong> — 클라우드 로드밸런서를 붙여 외부에 노출</li>
-<li><strong>ExternalName</strong> — 외부 DNS 이름으로 매핑</li>
-</ul>`,
+		body: body0005,
 		notes: null
 	},
 	{
@@ -95,9 +78,7 @@ export const items: Item[] = [
 		minutes: 4,
 		comments: 3,
 		discussionUrl: discussion(4),
-		body: `
-<p>Goroutine은 OS가 아니라 Go 런타임이 스케줄링하는 경량 실행 단위입니다. 작은 스택에서 시작해 필요할 때 늘어나기 때문에 수십만 개도 띄울 수 있습니다.</p>
-<p>런타임은 여러 goroutine을 소수의 OS 스레드 위에 얹어 실행합니다(M:N 스케줄링). 그래서 컨텍스트 스위칭 비용이 OS 스레드보다 훨씬 작습니다.</p>`,
+		body: body0004,
 		notes: null
 	},
 	{
@@ -113,9 +94,7 @@ export const items: Item[] = [
 		minutes: 2,
 		comments: 5,
 		discussionUrl: discussion(3),
-		body: `
-<p><strong>URI</strong>는 자원을 식별하는 문자열 전체를 가리키는 상위 개념입니다. <strong>URL</strong>은 그중에서도 자원의 <em>위치</em>와 접근 방법(프로토콜)까지 알려주는 URI입니다.</p>
-<p>즉 모든 URL은 URI이지만, 모든 URI가 URL은 아닙니다. 이름만으로 자원을 가리키는 URN이 그 예입니다.</p>`,
+		body: body0003,
 		notes: null
 	},
 	{
@@ -131,9 +110,7 @@ export const items: Item[] = [
 		minutes: 3,
 		comments: 9,
 		discussionUrl: discussion(2),
-		body: `
-<p>프로세스는 독립된 주소 공간을 가집니다. 스레드는 한 프로세스 안에서 코드·데이터·힙을 공유하고, 스택과 레지스터만 따로 가집니다.</p>
-<p>그래서 스레드 간 통신은 빠르지만 동기화 문제가 생기고, 프로세스 간에는 격리되는 대신 IPC가 필요합니다.</p>`,
+		body: body0002,
 		notes: null
 	},
 	{
@@ -149,9 +126,7 @@ export const items: Item[] = [
 		minutes: 4,
 		comments: 11,
 		discussionUrl: discussion(1),
-		body: `
-<p>HTML은 DOM으로, CSS는 CSSOM으로 파싱됩니다. 둘을 합쳐 렌더 트리를 만들고, 각 요소의 크기와 위치를 계산(Layout)한 뒤 화면에 그립니다(Paint).</p>
-<p>마지막으로 여러 레이어를 합성(Composite)해 최종 화면이 만들어집니다.</p>`,
+		body: body0001,
 		notes: null
 	}
 ];

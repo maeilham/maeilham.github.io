@@ -2,8 +2,12 @@
 	let email = $state('');
 	let submitted = $state(false);
 
+	// 이메일 형식이 맞을 때만 버튼을 활성화한다(서버가 최종 검증하므로 느슨한 검사).
+	const valid = $derived(/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()));
+
 	function subscribe(e: SubmitEvent) {
 		e.preventDefault();
+		if (!valid) return;
 		// TODO: POST /api/subscribe 연동. 성공해도 확인 메일 링크를 눌러야 구독이 확정된다.
 		submitted = true;
 	}
@@ -24,43 +28,43 @@
 <div class="page">
 	<a class="back" href="/v2/today" onclick={goBack}>← 돌아가기</a>
 
-	<h1>매일 아침 메일로 받아보기</h1>
+	<!-- 화면 세로 중앙: 이용 흐름(제목 자리) + 이메일 입력 -->
+	<main class="center">
+		<h1 class="sr-only">매일 아침 메일로 받아보기</h1>
 
-	{#if submitted}
-		<div class="sent" role="status">
-			<p class="sent-title">메일함을 확인해주세요</p>
-			<p class="sent-sub"><strong>{email}</strong>로 확인 링크를 보냈어요.</p>
-			<p class="sent-sub">링크를 누르면 구독이 완료돼요.</p>
+		<div class="inner">
+			{#if submitted}
+				<div class="sent" role="status">
+					<p class="sent-title">메일함을 확인해주세요</p>
+					<p class="sent-sub"><strong>{email}</strong>로 확인 링크를 보냈어요.</p>
+					<p class="sent-sub">링크를 누르면 구독이 완료돼요.</p>
+				</div>
+				<a class="link" href="/v2/today">오늘의 질문으로 돌아가기</a>
+			{:else}
+				<ol class="how" aria-label="이렇게 읽어요">
+					<li><span class="num">1</span>아침에 메일이 도착해요</li>
+					<li><span class="num">2</span>탭 한 번으로 질문을 열어요</li>
+					<li><span class="num">3</span>먼저 생각해보고, 답을 확인해요</li>
+					<li><span class="num">4</span>내 답을 GitHub에 남겨보세요</li>
+				</ol>
+
+				<form class="form" onsubmit={subscribe}>
+					<label class="sr-only" for="email">이메일</label>
+					<input
+						id="email"
+						type="email"
+						inputmode="email"
+						autocomplete="email"
+						placeholder="이메일 주소"
+						required
+						bind:value={email}
+					/>
+					<button type="submit" disabled={!valid}>메일로 받기</button>
+				</form>
+				<p class="note">메일 하단의 링크로 언제든 해지할 수 있어요.</p>
+			{/if}
 		</div>
-		<a class="link" href="/v2/today">오늘의 질문으로 돌아가기</a>
-	{:else}
-		<p class="desc">입력한 주소로 확인 링크를 보내드려요. 링크를 누르면 구독이 완료돼요.</p>
-
-		<form class="form" onsubmit={subscribe}>
-			<label class="sr-only" for="email">이메일</label>
-			<input
-				id="email"
-				type="email"
-				inputmode="email"
-				autocomplete="email"
-				placeholder="이메일 주소"
-				required
-				bind:value={email}
-			/>
-			<button type="submit">메일로 받기</button>
-		</form>
-		<p class="note">메일 하단의 링크로 언제든 해지할 수 있어요.</p>
-
-		<section class="how" aria-labelledby="how-title">
-			<h2 id="how-title" class="sr-only">이렇게 읽어요</h2>
-			<ol>
-				<li><span class="num">1</span>아침에 메일이 도착해요</li>
-				<li><span class="num">2</span>탭 한 번으로 질문을 열어요</li>
-				<li><span class="num">3</span>먼저 생각해보고, 답을 확인해요</li>
-				<li><span class="num">4</span>내 답을 GitHub에 남겨보세요</li>
-			</ol>
-		</section>
-	{/if}
+	</main>
 
 	<footer class="foot">© 2026 maeilham</footer>
 </div>
@@ -76,28 +80,30 @@
 	}
 
 	.page {
-		padding: 20px 0 calc(40px + env(safe-area-inset-bottom));
+		display: flex;
+		flex-direction: column;
+		min-height: 100dvh;
+		padding: 20px 0 calc(28px + env(safe-area-inset-bottom));
+	}
+	.center {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		align-items: center; /* 가로 중앙 */
+		justify-content: center; /* 세로 중앙 */
+		padding-bottom: 48px; /* 시각적으로 정중앙보다 살짝 위에 놓이게 */
+	}
+	/* 폰에서는 화면 폭을 그대로 쓰고, 넓은 화면에서는 400px 블록이 가운데에 놓인다. 글은 블록 안에서 왼쪽 정렬 */
+	.inner {
+		width: 100%;
+		max-width: 400px;
 	}
 	.back {
-		display: inline-block;
-		margin-bottom: 40px;
+		align-self: flex-start;
 		font-size: 14px;
 		font-weight: 600;
 		color: var(--v2-mute);
 		text-decoration: none;
-	}
-	h1 {
-		margin: 0 0 12px;
-		font-size: 26px;
-		font-weight: 700;
-		line-height: 1.4;
-		letter-spacing: -0.4px;
-	}
-	.desc {
-		margin: 0 0 28px;
-		font-size: 16px;
-		line-height: 1.7;
-		color: var(--v2-sub);
 	}
 
 	.form {
@@ -134,8 +140,13 @@
 		font-weight: 700;
 		cursor: pointer;
 	}
-	.form button:active {
+	.form button:not(:disabled):active {
 		opacity: 0.85;
+	}
+	.form button:disabled {
+		background: var(--v2-line);
+		color: var(--v2-mute);
+		cursor: not-allowed;
 	}
 	.note {
 		margin: 12px 0 0;
@@ -175,22 +186,20 @@
 	}
 
 	.how {
-		padding: 40px 0 0;
-	}
-	.how ol {
 		display: flex;
 		flex-direction: column;
-		gap: 14px;
-		margin: 0;
+		gap: 16px;
+		margin: 0 0 36px;
 		padding: 0;
 		list-style: none;
 	}
 	.how li {
 		display: flex;
 		align-items: center;
-		gap: 12px;
-		font-size: 15px;
-		color: var(--v2-sub);
+		gap: 14px;
+		font-size: 17px;
+		line-height: 1.5;
+		color: var(--v2-ink);
 	}
 	.num {
 		display: inline-flex;
@@ -207,7 +216,7 @@
 	}
 
 	.foot {
-		padding-top: 56px;
+		padding-top: 32px;
 		font-size: 13px;
 		color: var(--v2-mute);
 	}

@@ -20,12 +20,18 @@
 </header>
 
 <main>
-	<section class="hero">
-		<h1>출근길,<br />질문 하나.</h1>
-		<p>
-			아는 것 같았는데 막히는 것들. 매일 아침 한 통, 지하철에서 3분이면 끝나요. 다 읽으면
-			“오늘은 여기까지”, 끝이 있어서 부담 없어요.
+	<!-- 슬로건 대신 실제 콘텐츠가 첫 화면. 서비스가 무엇인지 예시로 보여준다 -->
+	<article class="today" aria-labelledby="today-title">
+		<p class="today-meta">
+			오늘의 질문 · <span class="mono">{today.date.replaceAll('-', '.')} · #{today.no}</span>
 		</p>
+		<h1 id="today-title" class="today-title">{today.title}</h1>
+		<p class="today-preview">{today.preview}</p>
+		<a class="today-cta" href="/v2/today">답 읽어보기 →</a>
+	</article>
+
+	<section class="subscribe" aria-labelledby="sub-title">
+		<h2 id="sub-title">이런 질문이 매일 아침 메일로 도착해요</h2>
 
 		{#if submitted}
 			<div class="sent" role="status">
@@ -44,19 +50,10 @@
 					required
 					bind:value={email}
 				/>
-				<button type="submit">무료로 구독하기</button>
+				<button type="submit">구독하기</button>
 			</form>
+			<p class="note">메일 하단의 링크로 언제든 해지할 수 있어요.</p>
 		{/if}
-	</section>
-
-	<section class="preview" aria-labelledby="preview-title">
-		<h2 id="preview-title">오늘 도착한 질문</h2>
-		<a class="card" href="/v2/today">
-			<p class="card-meta">{today.dateLabel} · #{today.no}</p>
-			<p class="card-title">{today.title}</p>
-			<p class="card-desc">{today.preview}</p>
-			<span class="card-cta">읽어보기 →</span>
-		</a>
 	</section>
 
 	<section class="how" aria-labelledby="how-title">
@@ -87,6 +84,9 @@
 		clip: rect(0 0 0 0);
 		white-space: nowrap;
 	}
+	.mono {
+		font-family: var(--v2-mono);
+	}
 
 	.top {
 		padding: 24px 0 0;
@@ -97,23 +97,50 @@
 		letter-spacing: -0.2px;
 	}
 
-	.hero {
+	/* 오늘의 질문 (첫 화면) */
+	.today {
 		padding: 56px 0 40px;
 	}
-	.hero h1 {
-		margin: 0;
-		font-size: 36px;
-		font-weight: 700;
-		line-height: 1.3;
-		letter-spacing: -1px;
+	.today-meta {
+		margin: 0 0 14px;
+		font-size: 13px;
+		color: var(--v2-mute);
 	}
-	.hero > p {
-		margin: 16px 0 28px;
+	.today-title {
+		margin: 0;
+		font-size: 28px;
+		font-weight: 700;
+		line-height: 1.4;
+		letter-spacing: -0.4px;
+	}
+	.today-preview {
+		margin: 16px 0 20px;
 		font-size: 16px;
-		line-height: 1.7;
+		line-height: 1.75;
 		color: var(--v2-sub);
 	}
+	.today-cta {
+		font-size: 15px;
+		font-weight: 600;
+		color: var(--v2-accent-text);
+		text-decoration: none;
+	}
+	.today-cta:hover {
+		text-decoration: underline;
+		text-underline-offset: 3px;
+	}
 
+	/* 구독 */
+	.subscribe {
+		padding: 32px 0 8px;
+		border-top: 1px solid var(--v2-line);
+	}
+	.subscribe h2 {
+		margin: 0 0 16px;
+		font-size: 16px;
+		font-weight: 600;
+		line-height: 1.5;
+	}
 	.form {
 		display: flex;
 		flex-direction: column;
@@ -151,6 +178,11 @@
 	.form button:active {
 		opacity: 0.85;
 	}
+	.note {
+		margin: 12px 0 0;
+		font-size: 13px;
+		color: var(--v2-mute);
+	}
 
 	.sent {
 		padding: 20px;
@@ -167,53 +199,6 @@
 		font-size: 14px;
 		color: var(--v2-sub);
 		overflow-wrap: anywhere;
-	}
-
-	.preview h2 {
-		margin: 0 0 12px;
-		font-size: 14px;
-		font-weight: 600;
-		color: var(--v2-mute);
-	}
-	.card {
-		display: block;
-		padding: 20px;
-		border-radius: 16px;
-		background: var(--v2-surface);
-		text-decoration: none;
-		-webkit-tap-highlight-color: transparent;
-	}
-	.card:active {
-		opacity: 0.85;
-	}
-	.card-meta {
-		margin: 0 0 8px;
-		font-size: 12px;
-		font-weight: 600;
-		color: var(--v2-sub);
-	}
-	.card-title {
-		margin: 0 0 8px;
-		font-size: 18px;
-		font-weight: 700;
-		line-height: 1.45;
-		letter-spacing: -0.3px;
-	}
-	.card-desc {
-		margin: 0 0 14px;
-		font-size: 14px;
-		line-height: 1.65;
-		color: var(--v2-sub);
-		display: -webkit-box;
-		-webkit-line-clamp: 2;
-		line-clamp: 2;
-		-webkit-box-orient: vertical;
-		overflow: hidden;
-	}
-	.card-cta {
-		font-size: 14px;
-		font-weight: 700;
-		color: var(--v2-accent-text);
 	}
 
 	.how {

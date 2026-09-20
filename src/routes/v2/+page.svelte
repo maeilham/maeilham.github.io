@@ -122,7 +122,7 @@
 	.form input {
 		height: 52px;
 		padding: 0 16px;
-		border: 1px solid var(--v2-line);
+		border: 1px solid var(--v2-border);
 		border-radius: 14px;
 		background: var(--v2-bg);
 		color: var(--v2-ink);
@@ -141,8 +141,8 @@
 		height: 52px;
 		border: 0;
 		border-radius: 14px;
-		background: var(--v2-accent);
-		color: var(--v2-accent-ink);
+		background: var(--v2-ink);
+		color: var(--v2-bg);
 		font: inherit;
 		font-size: 16px;
 		font-weight: 700;
@@ -190,7 +190,7 @@
 		margin: 0 0 8px;
 		font-size: 12px;
 		font-weight: 600;
-		color: var(--v2-accent);
+		color: var(--v2-sub);
 	}
 	.card-title {
 		margin: 0 0 8px;
@@ -213,7 +213,7 @@
 	.card-cta {
 		font-size: 14px;
 		font-weight: 700;
-		color: var(--v2-accent);
+		color: var(--v2-accent-text);
 	}
 
 	.how {

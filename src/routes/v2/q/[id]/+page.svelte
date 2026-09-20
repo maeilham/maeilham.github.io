@@ -30,7 +30,7 @@
 	.missing a {
 		display: inline-block;
 		margin-top: 12px;
-		color: var(--v2-accent);
+		color: var(--v2-accent-text);
 		font-weight: 600;
 	}
 </style>

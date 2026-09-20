@@ -97,7 +97,7 @@
 		margin: 0 0 12px;
 		font-size: 13px;
 		font-weight: 600;
-		color: var(--v2-accent);
+		color: var(--v2-sub);
 	}
 	.meta .dot {
 		color: var(--v2-mute);
@@ -172,8 +172,8 @@
 		height: 52px;
 		border: 0;
 		border-radius: 14px;
-		background: var(--v2-accent);
-		color: var(--v2-accent-ink);
+		background: var(--v2-ink);
+		color: var(--v2-bg);
 		font: inherit;
 		font-size: 16px;
 		font-weight: 700;
@@ -185,11 +185,11 @@
 		opacity: 0.85;
 	}
 	.primary:focus-visible {
-		outline: 3px solid var(--v2-accent-soft);
+		outline: 3px solid var(--v2-border);
 		outline-offset: 2px;
 	}
 	.reply .primary {
-		color: var(--v2-accent-ink);
+		color: var(--v2-bg);
 	}
 
 	/* 본문 */
@@ -218,7 +218,7 @@
 		margin-bottom: 6px;
 	}
 	.prose :global(a) {
-		color: var(--v2-accent);
+		color: var(--v2-accent-text);
 		text-underline-offset: 3px;
 	}
 	.prose :global(.table-wrap) {

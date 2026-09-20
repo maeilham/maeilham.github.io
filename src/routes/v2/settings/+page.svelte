@@ -129,13 +129,13 @@
 		padding: 0;
 		border: 0;
 		border-radius: 999px;
-		background: var(--v2-line);
+		background: var(--v2-border);
 		cursor: pointer;
 		transition: background 0.15s;
 		-webkit-tap-highlight-color: transparent;
 	}
 	.switch.on {
-		background: var(--v2-accent);
+		background: var(--v2-ink);
 	}
 	.knob {
 		position: absolute;
@@ -211,7 +211,7 @@
 		color: var(--v2-sub);
 	}
 	.notice a {
-		color: var(--v2-accent);
+		color: var(--v2-accent-text);
 		font-weight: 600;
 	}
 </style>

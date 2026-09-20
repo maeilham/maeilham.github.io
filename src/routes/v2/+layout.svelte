@@ -14,8 +14,7 @@
 </script>
 
 <svelte:head>
-	<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
-	<meta name="theme-color" content="#17171c" media="(prefers-color-scheme: dark)" />
+	<meta name="theme-color" content="#f6f5f2" />
 </svelte:head>
 
 <div class="v2" class:with-tabs={!isLanding}>
@@ -44,29 +43,34 @@
 
 <style>
 	:global(:root) {
-		--v2-bg: #ffffff;
-		--v2-surface: #f2f4f6;
-		--v2-ink: #191f28;
-		--v2-sub: #4e5968;
-		--v2-mute: #8b95a1;
-		--v2-line: #e5e8eb;
-		--v2-accent: #3182f6;
+		--v2-bg: #f6f5f2;
+		--v2-surface: #ebe9e4;
+		--v2-ink: #1f231e;
+		--v2-sub: #4a4f46;
+		--v2-mute: #6b7067;
+		--v2-line: #dedcd5;
+		--v2-border: #c9c7be;
+		--v2-accent: #4d7c3a;
+		--v2-accent-text: #3d6a2c;
 		--v2-accent-ink: #ffffff;
-		--v2-accent-soft: #e8f3ff;
+		--v2-accent-soft: #e3ebd9;
+		--v2-warm: #d9651a;
+		--v2-warm-soft: #fbe7d6;
+		--v2-warm-text: #a34a0c;
 		--v2-mono: ui-monospace, 'SF Mono', 'DM Mono', Menlo, Consolas, monospace;
 	}
-	@media (prefers-color-scheme: dark) {
-		:global(:root) {
-			--v2-bg: #17171c;
-			--v2-surface: #202027;
-			--v2-ink: #f2f4f6;
-			--v2-sub: #c3c8d0;
-			--v2-mute: #8b95a1;
-			--v2-line: #2c2c35;
-			--v2-accent: #4593fc;
-			--v2-accent-ink: #ffffff;
-			--v2-accent-soft: #1c2a3f;
-		}
+	/* TODO(dark): 다크모드는 후처리. 아래는 이전(파란 강조색) 팔레트라 새 웜그레이/올리브 그린 체계에 맞게
+	   다시 잡은 뒤 <html data-theme="dark">로 켠다. 지금은 어디서도 활성화되지 않는다. */
+	:global(:root[data-theme='dark']) {
+		--v2-bg: #17171c;
+		--v2-surface: #202027;
+		--v2-ink: #f2f4f6;
+		--v2-sub: #c3c8d0;
+		--v2-mute: #8b95a1;
+		--v2-line: #2c2c35;
+		--v2-accent: #4593fc;
+		--v2-accent-ink: #ffffff;
+		--v2-accent-soft: #1c2a3f;
 	}
 	:global(body:has(.v2)) {
 		background: var(--v2-bg);

@@ -36,7 +36,7 @@
 					</p>
 					<p class="row-title">{item.title}</p>
 				</div>
-				<span class="state" class:read={item.read} aria-label={item.read ? '읽음' : '안 읽음'}>
+				<span class="state" class:read={item.read} class:unread={!item.read} aria-label={item.read ? '읽음' : '안 읽음'}>
 					{#if item.read}
 						<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>
 					{/if}
@@ -128,8 +128,8 @@
 	.badge {
 		padding: 1px 6px;
 		border-radius: 4px;
-		background: var(--v2-accent-soft);
-		color: var(--v2-accent);
+		background: var(--v2-warm-soft);
+		color: var(--v2-warm-text);
 		font-weight: 700;
 	}
 	.row-title {
@@ -147,12 +147,17 @@
 		width: 24px;
 		height: 24px;
 		border-radius: 50%;
-		border: 1.5px solid var(--v2-line);
-		color: var(--v2-bg);
+		color: var(--v2-accent-ink);
 	}
 	.state.read {
-		border-color: var(--v2-accent);
 		background: var(--v2-accent);
+	}
+	.state.unread::after {
+		content: '';
+		width: 10px;
+		height: 10px;
+		border-radius: 50%;
+		background: var(--v2-warm);
 	}
 	.empty {
 		padding: 48px 0;

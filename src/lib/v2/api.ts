@@ -16,6 +16,17 @@ export interface ContentDetail {
 	discussionUrl?: string;
 }
 
+// GET /api/contents 응답의 항목 하나. 본문은 없고, 아직 발송 전인 글에는 sentAt이 없다.
+export interface ContentSummary {
+	repo: string;
+	repoName: string;
+	id: string;
+	title: string;
+	preview: string;
+	tags: string[];
+	sentAt?: string; // ISO 8601 (UTC)
+}
+
 // 서버가 오류 상태 코드를 돌려준 경우. 404(없음)와 그 밖의 오류를 화면에서 구분하는 데 쓴다.
 export class ApiError extends Error {
 	status: number;
@@ -52,4 +63,11 @@ export function toReaderItem(c: ContentDetail): ReaderItem {
 		body: c.body,
 		discussionUrl: c.discussionUrl || undefined
 	};
+}
+
+export async function getContentList(signal?: AbortSignal): Promise<ContentSummary[]> {
+	const res = await fetch(`${API_URL}/api/contents`, { signal });
+	if (!res.ok) throw new ApiError(res.status, `HTTP ${res.status}`);
+	const body = await res.json();
+	return Array.isArray(body?.items) ? body.items : [];
 }

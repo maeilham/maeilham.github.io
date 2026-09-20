@@ -1,10 +1,30 @@
 <script lang="ts">
-	import { items, today, type Category } from '$lib/v2/mock';
+	import { getContentList, type ContentSummary } from '$lib/v2/api';
+	import { ALL_REPOS, filterByRepo, repoNames, sentDateLabel } from '$lib/v2/list';
 
-	const filters: ('전체' | Category)[] = ['전체', '백엔드', '프론트엔드', 'CS'];
-	let filter = $state<'전체' | Category>('전체');
+	type Status = { kind: 'loading' } | { kind: 'ready'; items: ContentSummary[] } | { kind: 'error' };
 
-	const list = $derived(filter === '전체' ? items : items.filter((i) => i.category === filter));
+	let status = $state<Status>({ kind: 'loading' });
+	let attempt = $state(0); // 다시 시도를 누르면 올라가서 아래 effect가 다시 돈다
+	let filter = $state(ALL_REPOS);
+
+	$effect(() => {
+		void attempt;
+		const ctrl = new AbortController();
+		status = { kind: 'loading' };
+		getContentList(ctrl.signal)
+			.then((items) => (status = { kind: 'ready', items }))
+			.catch(() => {
+				if (!ctrl.signal.aborted) status = { kind: 'error' };
+			});
+		return () => ctrl.abort();
+	});
+
+	const items = $derived(status.kind === 'ready' ? status.items : []);
+	const names = $derived(repoNames(items));
+	// 선택해 둔 repo가 새 목록에 없으면 전체로 되돌린다
+	const activeFilter = $derived(names.includes(filter) ? filter : ALL_REPOS);
+	const list = $derived(filterByRepo(items, activeFilter));
 </script>
 
 <svelte:head>
@@ -16,37 +36,40 @@
 	<p>놓친 날도, 다시 보고 싶은 날도 여기서 읽어요.</p>
 </header>
 
-<div class="chips" role="group" aria-label="분야 필터">
-	{#each filters as f (f)}
-		<button class="chip" class:on={filter === f} aria-pressed={filter === f} onclick={() => (filter = f)}>
-			{f}
-		</button>
-	{/each}
-</div>
+{#if status.kind === 'loading'}
+	<p class="msg" role="status">불러오는 중…</p>
+{:else if status.kind === 'error'}
+	<div class="msg">
+		<p>질문 목록을 불러오지 못했어요.</p>
+		<button onclick={() => attempt++}>다시 시도</button>
+	</div>
+{:else}
+	{#if names.length > 0}
+		<div class="chips" role="group" aria-label="분야 필터">
+			{#each [ALL_REPOS, ...names] as f (f)}
+				<button class="chip" class:on={activeFilter === f} aria-pressed={activeFilter === f} onclick={() => (filter = f)}>
+					{f}
+				</button>
+			{/each}
+		</div>
+	{/if}
 
-<ul class="list">
-	{#each list as item (item.id)}
-		<li>
-			<a class="row" href="/v2/q/{item.id}">
-				<div class="row-main">
+	<ul class="list">
+		{#each list as item (item.repo + '/' + item.id)}
+			<li>
+				<a class="row" href="/v2/q/{encodeURIComponent(item.repo)}/{encodeURIComponent(item.id)}">
 					<p class="row-meta">
-						<span>{item.date.slice(5).replace('-', '.')}</span>
-						<span>{item.category}</span>
-						{#if item.id === today.id}<span class="badge">오늘</span>{/if}
+						{#if item.sentAt}<span>{sentDateLabel(item.sentAt)}</span>{/if}
+						<span>{item.repoName}</span>
 					</p>
 					<p class="row-title">{item.title}</p>
-				</div>
-				<span class="state" class:read={item.read} class:unread={!item.read} aria-label={item.read ? '읽음' : '안 읽음'}>
-					{#if item.read}
-						<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>
-					{/if}
-				</span>
-			</a>
-		</li>
-	{:else}
-		<li class="empty">이 분야의 질문이 아직 없어요.</li>
-	{/each}
-</ul>
+				</a>
+			</li>
+		{:else}
+			<li class="empty">{items.length ? '이 분야의 질문이 아직 없어요.' : '아직 질문이 없어요.'}</li>
+		{/each}
+	</ul>
+{/if}
 
 <style>
 	.head {
@@ -62,6 +85,25 @@
 		margin: 0;
 		font-size: 14px;
 		color: var(--v2-mute);
+	}
+
+	.msg {
+		padding-top: 48px;
+		text-align: center;
+		color: var(--v2-sub);
+	}
+	.msg p {
+		margin: 0;
+	}
+	.msg button {
+		margin-top: 12px;
+		padding: 0;
+		border: 0;
+		background: none;
+		color: var(--v2-accent-text);
+		font: inherit;
+		font-weight: 600;
+		cursor: pointer;
 	}
 
 	.chips {
@@ -99,9 +141,7 @@
 		list-style: none;
 	}
 	.row {
-		display: flex;
-		align-items: center;
-		gap: 12px;
+		display: block;
 		padding: 16px 0;
 		border-bottom: 1px solid var(--v2-line);
 		text-decoration: none;
@@ -109,10 +149,6 @@
 	}
 	.row:active {
 		opacity: 0.7;
-	}
-	.row-main {
-		flex: 1;
-		min-width: 0;
 	}
 	.row-meta {
 		display: flex;
@@ -122,39 +158,12 @@
 		font-size: 12px;
 		color: var(--v2-mute);
 	}
-	.badge {
-		padding: 1px 6px;
-		border-radius: 4px;
-		background: var(--v2-warm-soft);
-		color: var(--v2-warm-text);
-		font-weight: 700;
-	}
 	.row-title {
 		margin: 0;
 		font-size: 16px;
 		font-weight: 600;
 		line-height: 1.5;
 		letter-spacing: -0.2px;
-	}
-	.state {
-		flex: none;
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		width: 24px;
-		height: 24px;
-		border-radius: 50%;
-		color: var(--v2-accent-ink);
-	}
-	.state.read {
-		background: var(--v2-accent);
-	}
-	.state.unread::after {
-		content: '';
-		width: 10px;
-		height: 10px;
-		border-radius: 50%;
-		background: var(--v2-warm);
 	}
 	.empty {
 		padding: 48px 0;

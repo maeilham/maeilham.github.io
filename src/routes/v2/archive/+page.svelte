@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { getContentList, type ContentSummary } from '$lib/v2/api';
-	import { ALL_REPOS, filterByRepo, repoNames, sentDateLabel } from '$lib/v2/list';
+	import { ALL_REPOS, dateLabel, filterByRepo, repoNames } from '$lib/v2/list';
 
 	type Status = { kind: 'loading' } | { kind: 'ready'; items: ContentSummary[] } | { kind: 'error' };
 
@@ -59,7 +59,7 @@
 			<li>
 				<a class="row" href="/v2/q/{encodeURIComponent(item.repo)}/{encodeURIComponent(item.id)}">
 					<p class="row-meta">
-						{#if item.sentAt}<span>{sentDateLabel(item.sentAt)}</span>{/if}
+						<span>{dateLabel(item.authoredAt)}</span>
 						<span>{item.repoName}</span>
 					</p>
 					<p class="row-title">{item.title}</p>

@@ -11,10 +11,10 @@ export function filterByRepo(items: ContentSummary[], repoName: string): Content
 	return repoName === ALL_REPOS ? items : items.filter((i) => i.repoName === repoName);
 }
 
-// 발송 시각을 "09.10" 형태(브라우저 시간대 기준)로. 값이 없거나 깨져 있으면 빈 문자열.
-export function sentDateLabel(sentAt?: string): string {
-	if (!sentAt) return '';
-	const d = new Date(sentAt);
+// 시각을 "09.10" 형태(브라우저 시간대 기준)로. 값이 없거나 깨져 있으면 빈 문자열.
+export function dateLabel(iso?: string): string {
+	if (!iso) return '';
+	const d = new Date(iso);
 	if (Number.isNaN(d.getTime())) return '';
 	const pad = (n: number) => String(n).padStart(2, '0');
 	return `${pad(d.getMonth() + 1)}.${pad(d.getDate())}`;

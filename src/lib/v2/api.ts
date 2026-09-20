@@ -16,7 +16,7 @@ export interface ContentDetail {
 	discussionUrl?: string;
 }
 
-// GET /api/contents 응답의 항목 하나. 본문은 없고, 아직 발송 전인 글에는 sentAt이 없다.
+// GET /api/contents 응답의 항목 하나. 본문은 없다. 시각은 ISO 8601(UTC)이다.
 export interface ContentSummary {
 	repo: string;
 	repoName: string;
@@ -24,7 +24,8 @@ export interface ContentSummary {
 	title: string;
 	preview: string;
 	tags: string[];
-	sentAt?: string; // ISO 8601 (UTC)
+	authoredAt: string; // 글이 작성된 시각(GitHub 최초 커밋). 서버가 못 구했으면 sync한 시각으로 대체돼서 항상 있다
+	sentAt?: string; // 마지막으로 발송된 시각. 로테이션으로 덮어써지고 발송 전이면 없다 (목록 화면은 쓰지 않는다)
 }
 
 // 서버가 오류 상태 코드를 돌려준 경우. 404(없음)와 그 밖의 오류를 화면에서 구분하는 데 쓴다.

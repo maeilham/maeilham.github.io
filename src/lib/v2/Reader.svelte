@@ -20,7 +20,7 @@
 		<p class="meta">
 			<span>{isToday ? '오늘의 질문' : item.dateLabel}</span>
 			<span class="dot" aria-hidden="true">·</span>
-			<span class="mono">#{item.no}</span>
+			<span>{item.category}</span>
 			<span class="dot" aria-hidden="true">·</span>
 			<span>{item.minutes}분</span>
 		</p>

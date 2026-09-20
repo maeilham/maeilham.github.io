@@ -31,7 +31,7 @@
 				<div class="row-main">
 					<p class="row-meta">
 						<span>{item.date.slice(5).replace('-', '.')}</span>
-						<span class="mono">#{item.no}</span>
+						<span>{item.category}</span>
 						{#if item.id === today.id}<span class="badge">오늘</span>{/if}
 					</p>
 					<p class="row-title">{item.title}</p>
@@ -121,9 +121,6 @@
 		margin: 0 0 4px;
 		font-size: 12px;
 		color: var(--v2-mute);
-	}
-	.mono {
-		font-family: var(--v2-mono);
 	}
 	.badge {
 		padding: 1px 6px;

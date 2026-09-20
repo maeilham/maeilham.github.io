@@ -23,7 +23,7 @@
 	<!-- 슬로건 대신 실제 콘텐츠가 첫 화면. 서비스가 무엇인지 예시로 보여준다 -->
 	<article class="today" aria-labelledby="today-title">
 		<p class="today-meta">
-			오늘의 질문 · <span class="mono">{today.date.replaceAll('-', '.')} · #{today.no}</span>
+			오늘의 질문 · <span class="mono">{today.date.replaceAll('-', '.')}</span> · {today.category}
 		</p>
 		<h1 id="today-title" class="today-title">{today.title}</h1>
 		<p class="today-preview">{today.preview}</p>

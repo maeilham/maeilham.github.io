@@ -6,6 +6,7 @@ import body0003 from './mock/0003-url-vs-uri.md?raw';
 import body0004 from './mock/0004-goroutine-vs-thread.md?raw';
 import body0005 from './mock/0005-k8s-service-types.md?raw';
 import body0006 from './mock/0006-scale-up-vs-out.md?raw';
+import body0007 from './mock/0007-innodb-buffer-pool-vs-redis.md?raw';
 
 export type Category = '백엔드' | '프론트엔드' | 'CS';
 
@@ -29,6 +30,23 @@ export interface Item {
 const discussion = (n: number) => `https://github.com/maeilham/backend-ops/discussions/${n}`;
 
 export const items: Item[] = [
+	{
+		id: '0007-innodb-buffer-pool-vs-redis',
+		no: 7,
+		date: '2026-09-25',
+		dateLabel: '9월 25일 금요일',
+		title: 'InnoDB 버퍼 풀이 있는데 Redis를 쓰면 무엇이 좋은가요?',
+		preview:
+			'InnoDB도 최근에 참조한 데이터 페이지를 메모리에 캐시합니다. 그런데도 별도로 Redis를 두는 이유는 무엇일까요?',
+		tags: ['mysql', 'redis', 'cache'],
+		category: '백엔드',
+		read: false,
+		minutes: 4,
+		comments: 8,
+		discussionUrl: discussion(7),
+		body: body0007,
+		notes: null
+	},
 	{
 		id: '0006-scale-up-vs-out',
 		no: 6,
@@ -132,6 +150,7 @@ export const items: Item[] = [
 ];
 
 export const today = items[0];
+
 
 export const getItem = (id: string) => items.find((i) => i.id === id);
 

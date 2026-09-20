@@ -164,7 +164,7 @@
 		bottom: calc(56px + env(safe-area-inset-bottom) + 12px);
 		transform: translateX(-50%);
 		width: calc(100% - 40px);
-		max-width: 440px;
+		max-width: calc(var(--v2-max) - 40px); /* 컬럼 폭 - 좌우 패딩 */
 		z-index: 10;
 	}
 

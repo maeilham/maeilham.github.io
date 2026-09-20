@@ -50,6 +50,7 @@
 		--v2-mute: #6b7067;
 		--v2-line: #dedcd5;
 		--v2-border: #c9c7be;
+		--v2-max: 640px; /* 콘텐츠 컬럼 최대 폭. 화면이 이보다 좁으면 화면 폭을 그대로 쓴다 */
 		--v2-accent: #4d7c3a;
 		--v2-accent-text: #3d6a2c;
 		--v2-accent-ink: #ffffff;
@@ -78,7 +79,7 @@
 
 	.v2 {
 		min-height: 100dvh;
-		max-width: 480px;
+		max-width: var(--v2-max);
 		margin: 0 auto;
 		padding: 0 20px;
 		background: var(--v2-bg);
@@ -101,7 +102,7 @@
 		bottom: 0;
 		transform: translateX(-50%);
 		width: 100%;
-		max-width: 480px;
+		max-width: var(--v2-max);
 		display: grid;
 		grid-template-columns: repeat(3, 1fr);
 		padding-bottom: env(safe-area-inset-bottom);

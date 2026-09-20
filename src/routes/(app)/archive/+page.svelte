@@ -57,7 +57,7 @@
 	<ul class="list">
 		{#each list as item (item.repo + '/' + item.id)}
 			<li>
-				<a class="row" href="/v2/q/{encodeURIComponent(item.repo)}/{encodeURIComponent(item.id)}">
+				<a class="row" href="/q/{encodeURIComponent(item.repo)}/{encodeURIComponent(item.id)}">
 					<p class="row-meta">
 						<span>{dateLabel(item.authoredAt)}</span>
 						<span>{item.repoName}</span>

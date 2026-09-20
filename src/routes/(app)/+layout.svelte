@@ -8,13 +8,14 @@
 	$effect(() => initAuth(page.url));
 
 	const path = $derived(page.url.pathname.replace(/\/$/, ''));
-	// 랜딩과 구독 폼은 탭 없이 단독 화면으로 보여준다.
-	const hideTabs = $derived(path === '/v2' || path === '/v2/subscribe');
+	// 구독 폼과 구독 확인·해지 안내는 탭 없이 단독 화면으로 보여준다.
+	const hideTabs = $derived(['/subscribe', '/confirm', '/unsubscribe'].includes(path));
 
+	// path는 끝의 /를 뗀 값이라 루트는 빈 문자열이다.
 	const tabs = [
-		{ href: '/v2/today', label: '오늘', match: (p: string) => p === '/v2/today' },
-		{ href: '/v2/archive', label: '지난 질문', match: (p: string) => p === '/v2/archive' || p.startsWith('/v2/q/') },
-		{ href: '/v2/settings', label: '설정', match: (p: string) => p === '/v2/settings' }
+		{ href: '/', label: '오늘', match: (p: string) => p === '' },
+		{ href: '/archive', label: '지난 질문', match: (p: string) => p === '/archive' || p.startsWith('/q/') },
+		{ href: '/settings', label: '설정', match: (p: string) => p === '/settings' }
 	];
 </script>
 

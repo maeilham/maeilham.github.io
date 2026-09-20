@@ -23,7 +23,7 @@
 <article class="reader">
 	<header class="head">
 		{#if !isToday}
-			<a class="back" href="/v2/archive">← 지난 질문</a>
+			<a class="back" href="/archive">← 지난 질문</a>
 		{/if}
 		<p class="meta">
 			{#each metaParts as part, i}
@@ -77,7 +77,7 @@
 			{/if}
 			<!-- 비구독자에게만. 'unknown'(서버 확인 전)에는 그리지 않아 구독자에게 깜빡이지 않게 한다 -->
 			{#if auth.status === 'visitor'}
-				<a class="secondary" href="/v2/subscribe">매일 아침 메일로 받기</a>
+				<a class="secondary" href="/subscribe">매일 아침 메일로 받기</a>
 			{/if}
 		</section>
 

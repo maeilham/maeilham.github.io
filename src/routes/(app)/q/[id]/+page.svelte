@@ -17,7 +17,7 @@
 {:else}
 	<div class="missing">
 		<p>찾을 수 없는 질문이에요.</p>
-		<a href="/v2/archive">지난 질문으로 돌아가기</a>
+		<a href="/archive">지난 질문으로 돌아가기</a>
 	</div>
 {/if}
 

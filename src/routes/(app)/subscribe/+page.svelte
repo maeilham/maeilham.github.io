@@ -1,16 +1,8 @@
 <script lang="ts">
-	let email = $state('');
-	let submitted = $state(false);
+	import { SubscribeForm } from '$lib/v2/subscribe.svelte';
 
-	// 이메일 형식이 맞을 때만 버튼을 활성화한다(서버가 최종 검증하므로 느슨한 검사).
-	const valid = $derived(/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()));
-
-	function subscribe(e: SubmitEvent) {
-		e.preventDefault();
-		if (!valid) return;
-		// TODO: POST /api/subscribe 연동. 성공해도 확인 메일 링크를 눌러야 구독이 확정된다.
-		submitted = true;
-	}
+	// 이메일 형식이 맞을 때만 버튼을 활성화한다(form.valid). 성공해도 메일의 링크를 눌러야 구독이 확정된다.
+	const form = new SubscribeForm();
 
 	// 오던 화면(오늘/지난 질문)으로 돌아간다. 주소를 직접 열어 히스토리가 없으면 링크 기본 동작(오늘)을 쓴다.
 	function goBack(e: MouseEvent) {
@@ -26,20 +18,20 @@
 </svelte:head>
 
 <div class="page">
-	<a class="back" href="/v2/today" onclick={goBack}>← 돌아가기</a>
+	<a class="back" href="/" onclick={goBack}>← 돌아가기</a>
 
 	<!-- 화면 세로 중앙: 이용 흐름(제목 자리) + 이메일 입력 -->
 	<main class="center">
 		<h1 class="sr-only">매일 아침 메일로 받아보기</h1>
 
 		<div class="inner">
-			{#if submitted}
+			{#if form.status === 'sent'}
 				<div class="sent" role="status">
 					<p class="sent-title">메일함을 확인해주세요</p>
-					<p class="sent-sub"><strong>{email}</strong>로 확인 링크를 보냈어요.</p>
+					<p class="sent-sub"><strong>{form.email}</strong>로 확인 링크를 보냈어요.</p>
 					<p class="sent-sub">링크를 누르면 구독이 완료돼요.</p>
 				</div>
-				<a class="link" href="/v2/today">오늘의 질문으로 돌아가기</a>
+				<a class="link" href="/">오늘의 질문으로 돌아가기</a>
 			{:else}
 				<ol class="how" aria-label="이렇게 읽어요">
 					<li><span class="num">1</span>아침에 메일이 도착해요</li>
@@ -48,7 +40,7 @@
 					<li><span class="num">4</span>내 답을 GitHub에 남겨보세요</li>
 				</ol>
 
-				<form class="form" onsubmit={subscribe}>
+				<form class="form" onsubmit={form.submit}>
 					<label class="sr-only" for="email">이메일</label>
 					<input
 						id="email"
@@ -57,10 +49,15 @@
 						autocomplete="email"
 						placeholder="이메일 주소"
 						required
-						bind:value={email}
+						bind:value={form.email}
 					/>
-					<button type="submit" disabled={!valid}>메일로 받기</button>
+					<button type="submit" disabled={!form.valid || form.status === 'sending'}>
+						{form.status === 'sending' ? '보내는 중…' : '메일로 받기'}
+					</button>
 				</form>
+				{#if form.status === 'error'}
+					<p class="error" role="alert">{form.error}</p>
+				{/if}
 				<p class="note">메일 하단의 링크로 언제든 해지할 수 있어요.</p>
 			{/if}
 		</div>
@@ -147,6 +144,11 @@
 		background: var(--v2-line);
 		color: var(--v2-mute);
 		cursor: not-allowed;
+	}
+	.error {
+		margin: 12px 0 0;
+		font-size: 14px;
+		color: var(--v2-warm-text);
 	}
 	.note {
 		margin: 12px 0 0;

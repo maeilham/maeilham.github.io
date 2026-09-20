@@ -23,7 +23,7 @@
 	<div class="notice" role="status">
 		<p class="notice-title">구독이 해지됐어요</p>
 		<p class="notice-sub">그동안 함께해서 고마웠어요. 언제든 다시 구독할 수 있어요.</p>
-		<a href="/v2">처음으로</a>
+		<a href="/">처음으로</a>
 	</div>
 {:else}
 	<section class="block" aria-labelledby="src-title">

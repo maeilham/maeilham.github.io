@@ -76,6 +76,27 @@ export async function getToday(signal?: AbortSignal): Promise<TodayItem> {
 	return body.item;
 }
 
+// 구독 확인 메일을 요청한다. 성공해도 메일의 링크를 눌러야 구독이 확정된다.
+// 서버는 이미 구독 중인 주소에도 같은 응답을 주므로, 화면에서 둘을 구분할 수 없다(주소 존재 여부가 새지 않는다).
+export async function subscribe(email: string, signal?: AbortSignal): Promise<void> {
+	const res = await fetch(`${API_URL}/api/subscribe`, {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify({ email }),
+		signal
+	});
+	if (!res.ok) throw await toApiError(res);
+}
+
+// 메일 하단 해지 링크의 토큰으로 구독을 해지한다. 토큰이 잘못됐거나 만료됐으면 400이다.
+export async function unsubscribe(token: string, signal?: AbortSignal): Promise<void> {
+	const res = await fetch(`${API_URL}/api/unsubscribe?token=${encodeURIComponent(token)}`, {
+		method: 'POST',
+		signal
+	});
+	if (!res.ok) throw await toApiError(res);
+}
+
 export function toReaderItem(c: ContentDetail): ReaderItem {
 	return {
 		title: c.title,

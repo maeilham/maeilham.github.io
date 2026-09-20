@@ -44,7 +44,7 @@
 {:else if status.kind === 'none'}
 	<div class="msg">
 		<p>아직 오늘의 질문이 없어요.</p>
-		<a href="/v2/archive">지난 질문 보기</a>
+		<a href="/archive">지난 질문 보기</a>
 	</div>
 {:else}
 	<div class="msg">

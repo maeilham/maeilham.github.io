@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import Reader from '$lib/v2/Reader.svelte';
-	import { getItem, today } from '$lib/v2/mock';
+	import { getItem, today, toReaderItem } from '$lib/v2/mock';
 
 	const item = $derived(getItem(page.params.id ?? ''));
 </script>
@@ -12,7 +12,7 @@
 
 {#if item}
 	{#key item.id}
-		<Reader {item} isToday={item.id === today.id} />
+		<Reader item={toReaderItem(item)} isToday={item.id === today.id} />
 	{/key}
 {:else}
 	<div class="missing">

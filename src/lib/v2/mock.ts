@@ -7,6 +7,7 @@ import body0004 from './mock/0004-goroutine-vs-thread.md?raw';
 import body0005 from './mock/0005-k8s-service-types.md?raw';
 import body0006 from './mock/0006-scale-up-vs-out.md?raw';
 import body0007 from './mock/0007-innodb-buffer-pool-vs-redis.md?raw';
+import type { ReaderItem } from './types';
 
 export type Category = '백엔드' | '프론트엔드' | 'CS';
 
@@ -151,6 +152,20 @@ export const items: Item[] = [
 
 export const today = items[0];
 
+// mock 항목을 Reader가 받는 모양으로 바꾼다. (서버 API 응답은 api.ts의 toReaderItem이 같은 모양으로 바꾼다)
+export const toReaderItem = (i: Item): ReaderItem => ({
+	title: i.title,
+	preview: i.preview,
+	tags: i.tags,
+	label: i.category,
+	body: i.body,
+	dateLabel: i.dateLabel,
+	minutes: i.minutes,
+	comments: i.comments,
+	notes: i.notes,
+	discussionUrl: i.discussionUrl,
+	read: i.read
+});
 
 export const getItem = (id: string) => items.find((i) => i.id === id);
 

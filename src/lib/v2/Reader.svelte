@@ -1,12 +1,20 @@
 <script lang="ts">
-	import { week, type Item } from '$lib/v2/mock';
+	import { week } from '$lib/v2/mock';
+	import type { ReaderItem } from '$lib/v2/types';
 	import { renderMarkdown } from '$lib/v2/markdown';
 	import { auth } from '$lib/v2/auth.svelte';
 
-	let { item, isToday = false }: { item: Item; isToday?: boolean } = $props();
+	let { item, isToday = false }: { item: ReaderItem; isToday?: boolean } = $props();
 
 	let revealed = $state(false);
-	const open = $derived(revealed || item.read);
+	const open = $derived(revealed || !!item.read);
+
+	// 헤더 메타 줄. 서버에 없는 값(날짜, 읽는 시간)은 비어 있으면 빼고 그린다.
+	const metaParts = $derived(
+		[isToday ? '오늘의 질문' : item.dateLabel, item.label, item.minutes ? `${item.minutes}분` : undefined].filter(
+			(p): p is string => !!p
+		)
+	);
 	// 답을 펼칠 때만 렌더한다($derived는 읽힐 때 계산됨). 결과는 살균된 HTML이다.
 	const bodyHtml = $derived(renderMarkdown(item.body));
 	const notesHtml = $derived(item.notes ? renderMarkdown(item.notes) : '');
@@ -18,11 +26,10 @@
 			<a class="back" href="/v2/archive">← 지난 질문</a>
 		{/if}
 		<p class="meta">
-			<span>{isToday ? '오늘의 질문' : item.dateLabel}</span>
-			<span class="dot" aria-hidden="true">·</span>
-			<span>{item.category}</span>
-			<span class="dot" aria-hidden="true">·</span>
-			<span>{item.minutes}분</span>
+			{#each metaParts as part, i}
+				{#if i > 0}<span class="dot" aria-hidden="true">·</span>{/if}
+				<span>{part}</span>
+			{/each}
 		</p>
 		<h1 class="title">{item.title}</h1>
 		<p class="preview">{item.preview}</p>
@@ -56,11 +63,18 @@
 		{/if}
 
 		<section class="reply">
-			<h2>내 생각은 어땠나요?</h2>
-			<p>{item.comments}명이 답을 남겼어요. 나의 답도 한 줄 남겨보세요.</p>
-			<a class="primary" href={item.discussionUrl} target="_blank" rel="noreferrer">
-				내 답 남기기
-			</a>
+			<!-- Discussion이 아직 없는 글(발송 전)에는 답 남기기를 그리지 않는다 -->
+			{#if item.discussionUrl}
+				<h2>내 생각은 어땠나요?</h2>
+				<p>
+					{item.comments
+						? `${item.comments}명이 답을 남겼어요. 나의 답도 한 줄 남겨보세요.`
+						: '나의 답을 한 줄 남겨보세요.'}
+				</p>
+				<a class="primary" href={item.discussionUrl} target="_blank" rel="noreferrer">
+					내 답 남기기
+				</a>
+			{/if}
 			<!-- 비구독자에게만. 'unknown'(서버 확인 전)에는 그리지 않아 구독자에게 깜빡이지 않게 한다 -->
 			{#if auth.status === 'visitor'}
 				<a class="secondary" href="/v2/subscribe">매일 아침 메일로 받기</a>
@@ -215,6 +229,9 @@
 		font-weight: 600;
 		text-decoration: none;
 		-webkit-tap-highlight-color: transparent;
+	}
+	.secondary:first-child {
+		margin-top: 0; /* 위에 답 남기기 버튼이 없을 때 */
 	}
 	.secondary:active {
 		opacity: 0.85;

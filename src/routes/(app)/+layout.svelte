@@ -14,8 +14,9 @@
 	// path는 끝의 /를 뗀 값이라 루트는 빈 문자열이다.
 	const tabs = [
 		{ href: '/', label: '오늘', match: (p: string) => p === '' },
-		{ href: '/archive', label: '지난 질문', match: (p: string) => p === '/archive' || p.startsWith('/q/') },
-		{ href: '/settings', label: '설정', match: (p: string) => p === '/settings' }
+		{ href: '/archive', label: '지난 질문', match: (p: string) => p === '/archive' || p.startsWith('/q/') }
+		// 설정 탭은 숨김. 구독자 식별(메일 링크 토큰)이 정해지고 설정 화면이 실제 API에 연결되면 다시 켠다.
+		// { href: '/settings', label: '설정', match: (p: string) => p === '/settings' }
 	];
 </script>
 
@@ -110,7 +111,8 @@
 		width: 100%;
 		max-width: var(--v2-max);
 		display: grid;
-		grid-template-columns: repeat(3, 1fr);
+		grid-auto-flow: column; /* 탭 개수와 관계없이 폭을 균등하게 나눈다 */
+		grid-auto-columns: 1fr;
 		padding-bottom: env(safe-area-inset-bottom);
 		background: var(--v2-bg);
 		border-top: 1px solid var(--v2-line);

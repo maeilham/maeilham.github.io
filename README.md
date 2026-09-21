@@ -1,42 +1,28 @@
-# sv
+# 매일함 웹
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+ 배포 주소: <https://maeilham.github.io>
 
-## Creating a project
+## 시작하기
 
-If you're seeing this, you've probably already done this step. Congrats!
-
-```sh
-# create a new project
-npx sv create my-app
-```
-
-To recreate this project with the same configuration:
+Node 22, pnpm 9 기준입니다(CI와 같음).
 
 ```sh
-# recreate this project
-pnpm dlx sv@0.15.3 create --template minimal --types ts --install pnpm web
+pnpm install
+cp .env.example .env.local   # API 서버 주소가 다르면 VITE_API_URL 수정
+pnpm dev
 ```
 
-## Developing
+API 서버가 떠 있어야 화면에 데이터가 나옵니다. 실행 방법은 서버 저장소의 README를 참고하세요(기본 `http://localhost:8080`).
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+| 명령 | 설명 |
+| --- | --- |
+| `pnpm dev` | 개발 서버 |
+| `pnpm build` | 프로덕션 빌드(`build/`) |
+| `pnpm preview` | 빌드 결과 미리보기 |
+| `pnpm check` | 타입·Svelte 검사(`svelte-check`) |
 
-```sh
-npm run dev
+### 환경변수
 
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
-```
-
-## Building
-
-To create a production version of your app:
-
-```sh
-npm run build
-```
-
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+| 변수 | 기본값 | 설명 |
+| --- | --- | --- |
+| `VITE_API_URL` | `http://localhost:8080` | API 서버 주소(끝의 `/` 없이) |

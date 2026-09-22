@@ -1,5 +1,6 @@
 <script lang="ts">
-	// 이 화면은 아직 서버에 연결되지 않은 목 화면이다(탭에서 숨김). 아래 값은 모두 가짜다.
+	// 이 화면은 아직 서버에 연결되지 않은 목 화면이다. 탭(+layout.svelte)에서는 구독자에게 노출되지만
+	// 아래 값은 모두 가짜다. 실제 API 연결은 별도 작업이다.
 	const email = 'me@example.com';
 
 	let sources = $state([

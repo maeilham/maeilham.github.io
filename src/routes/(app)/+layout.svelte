@@ -4,8 +4,10 @@
 
 	let { children } = $props();
 
-	// 클라이언트에서만 실행된다(localStorage). 주소가 바뀔 때 ?sub= 전환도 반영한다.
-	$effect(() => initAuth(page.url));
+	// 클라이언트에서만 실행된다(sessionStorage). 주소가 바뀔 때(라우트 이동, #t= 재진입)마다 다시 확인한다.
+	$effect(() => {
+		initAuth(page.url);
+	});
 
 	const path = $derived(page.url.pathname.replace(/\/$/, ''));
 	// 구독 폼과 구독 확인·해지 안내는 탭 없이 단독 화면으로 보여준다.

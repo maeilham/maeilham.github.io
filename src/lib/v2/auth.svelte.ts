@@ -1,23 +1,92 @@
-// UI 목업용 구독자 상태. 실제 연동 시 이 파일만 바꾼다:
-//   메일 링크의 #t=<token>을 읽어 localStorage에 저장 → GET /api/me(Authorization: Bearer)로 확인 →
-//   응답이 200이면 'subscriber', 401이면 토큰을 지우고 'visitor'.
+// 구독자 상태. 메일 링크의 #t=<token>을 읽어 sessionStorage에 저장하고, 처음 여는 링크면
+// POST /api/session(가입 완료, 멱등), 저장된 토큰이 있으면 GET /api/me(조회만)로 확인한다.
+// 401이면 토큰을 지우고 방문자로 본다.
+//
+// 저장소로 sessionStorage를 쓰는 이유: 링크(북마크)가 원본이고, 저장소는 같은 탭 안에서 화면을
+// 이동하거나 새로고침해도 기록이 끊기지 않게 하는 보조 역할만 한다. 그냥 주소로 들어온 사람은
+// 매번 방문자이고, 메일의 개인 링크로 들어오도록 안내한다(localStorage로 기기에 남기지 않는다).
 //
 // 'unknown'은 서버 확인이 끝나기 전 상태다. 이때 구독 버튼을 보여주면 구독자에게 잠깐 깜빡이므로
-// 화면은 'visitor'일 때만 구독 UI를 그린다.
-//
-// 개발 중 확인용 전환: 주소에 ?sub=1 (구독자) 또는 ?sub=0 (비구독자)을 붙이면 localStorage에 유지된다.
+// 화면은 'visitor'일 때만 구독 UI를 그린다. 네트워크 오류 등 401이 아닌 실패는 상태를 바꾸지
+// 않는다('unknown' 유지) — 잘못 방문자로 단정해서 구독 유도 문구를 잘못 보여주는 것보다 안전하다.
+import { ApiError, establishSession, fetchMe } from './api';
+
 export type AuthStatus = 'unknown' | 'subscriber' | 'visitor';
 
-const KEY = 'maeilham.mock.subscriber';
+const STORAGE_KEY = 'maeilham.token';
+const TOKEN_RE = /^[0-9a-f]{64}$/;
+
+// sessionStorage가 막힌 환경(시크릿 모드 등)의 대체용. 새로고침하면 사라진다.
+let memoryToken: string | null = null;
+
+function getToken(): string | null {
+	try {
+		return sessionStorage.getItem(STORAGE_KEY) ?? memoryToken;
+	} catch {
+		return memoryToken;
+	}
+}
+
+function setToken(token: string) {
+	memoryToken = token;
+	try {
+		sessionStorage.setItem(STORAGE_KEY, token);
+	} catch {
+		// 저장이 막힌 환경. 메모리로만 유지한다.
+	}
+}
+
+function clearToken() {
+	memoryToken = null;
+	try {
+		sessionStorage.removeItem(STORAGE_KEY);
+	} catch {
+		// ignore
+	}
+}
+
+// 주소의 #t=<64자 hex>를 읽는다. 다른 목적의 해시(예: 브라우저 확장이 붙인 값)는 무시한다.
+function readTokenFromHash(url: URL): string | null {
+	if (!url.hash) return null;
+	const t = new URLSearchParams(url.hash.slice(1)).get('t');
+	return t && TOKEN_RE.test(t) ? t : null;
+}
 
 export const auth = $state<{ status: AuthStatus }>({ status: 'unknown' });
 
-export function initAuth(url: URL) {
-	try {
-		const q = url.searchParams.get('sub');
-		if (q === '1' || q === '0') localStorage.setItem(KEY, q);
-		auth.status = localStorage.getItem(KEY) === '1' ? 'subscriber' : 'visitor';
-	} catch {
+export async function initAuth(url: URL): Promise<void> {
+	const fromHash = readTokenFromHash(url);
+	if (fromHash) {
+		try {
+			await establishSession(fromHash);
+			setToken(fromHash);
+			auth.status = 'subscriber';
+		} catch (err) {
+			if (err instanceof ApiError && err.status === 401) {
+				clearToken();
+				auth.status = 'visitor';
+			}
+			// 그 외 오류는 상태를 바꾸지 않는다(위 주석 참고).
+		}
+		return;
+	}
+
+	// 라우트를 이동할 때마다 이 함수가 다시 불리므로(주소가 바뀌면 실행됨), 판정이 이미 끝났으면
+	// 매번 GET /api/me를 다시 부르지 않는다. #t가 있는 경우는 위에서 항상 처리한다(서버가 멱등).
+	if (auth.status !== 'unknown') return;
+
+	const stored = getToken();
+	if (!stored) {
 		auth.status = 'visitor';
+		return;
+	}
+	try {
+		await fetchMe(stored);
+		auth.status = 'subscriber';
+	} catch (err) {
+		if (err instanceof ApiError && err.status === 401) {
+			clearToken();
+			auth.status = 'visitor';
+		}
 	}
 }

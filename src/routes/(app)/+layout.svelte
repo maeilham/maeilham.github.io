@@ -1,23 +1,28 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { initAuth } from '$lib/v2/auth.svelte';
+	import { auth, initAuth } from '$lib/v2/auth.svelte';
 
 	let { children } = $props();
 
-	// 클라이언트에서만 실행된다(localStorage). 주소가 바뀔 때 ?sub= 전환도 반영한다.
-	$effect(() => initAuth(page.url));
+	// 클라이언트에서만 실행된다(sessionStorage). 주소가 바뀔 때(라우트 이동, #t= 재진입)마다 다시 확인한다.
+	$effect(() => {
+		initAuth(page.url);
+	});
 
 	const path = $derived(page.url.pathname.replace(/\/$/, ''));
 	// 구독 폼과 구독 확인·해지 안내는 탭 없이 단독 화면으로 보여준다.
 	const hideTabs = $derived(['/subscribe', '/confirm', '/unsubscribe'].includes(path));
 
 	// path는 끝의 /를 뗀 값이라 루트는 빈 문자열이다.
-	const tabs = [
+	// 설정 탭은 구독자(auth.status === 'subscriber')에게만 보인다. 화면 자체는 아직 목(mock) 데이터다
+	// (settings/+page.svelte 참고) — 탭 노출만 먼저 하고, 실제 API 연결은 별도 작업이다.
+	const tabs = $derived([
 		{ href: '/', label: '오늘', match: (p: string) => p === '' },
-		{ href: '/archive', label: '지난 질문', match: (p: string) => p === '/archive' || p.startsWith('/q/') }
-		// 설정 탭은 숨김. 구독자 식별(메일 링크 토큰)이 정해지고 설정 화면이 실제 API에 연결되면 다시 켠다.
-		// { href: '/settings', label: '설정', match: (p: string) => p === '/settings' }
-	];
+		{ href: '/archive', label: '지난 질문', match: (p: string) => p === '/archive' || p.startsWith('/q/') },
+		...(auth.status === 'subscriber'
+			? [{ href: '/settings', label: '설정', match: (p: string) => p === '/settings' }]
+			: [])
+	]);
 </script>
 
 <svelte:head>

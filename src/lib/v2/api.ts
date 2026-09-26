@@ -97,6 +97,36 @@ export async function unsubscribe(token: string, signal?: AbortSignal): Promise<
 	if (!res.ok) throw await toApiError(res);
 }
 
+// 개인 링크 토큰(access token)을 Authorization 헤더로 붙여서 보낸다. 쿼리에 넣지 않는 이유는
+// 서버 로그나 프록시에 남지 않게 하려는 것이다(해지 토큰의 ?token=과는 다른 체계).
+async function authFetch(path: string, accessToken: string, init?: RequestInit): Promise<Response> {
+	return fetch(`${API_URL}${path}`, {
+		...init,
+		headers: { ...init?.headers, Authorization: `Bearer ${accessToken}` }
+	});
+}
+
+// POST /api/session 응답.
+export interface SessionResult {
+	newlyConfirmed: boolean;
+}
+
+// 개인 링크(#t=)를 처음 열었을 때 부른다. 가입을 완료한다(서버가 멱등하게 처리하므로 이미
+// 확인된 사람이 다시 불러도 안전하다). 토큰이 형식에 안 맞거나, 모르는 토큰이거나, 해지한
+// 사람이면 401(ApiError)이다.
+export async function establishSession(accessToken: string, signal?: AbortSignal): Promise<SessionResult> {
+	const res = await authFetch('/api/session', accessToken, { method: 'POST', signal });
+	if (!res.ok) throw await toApiError(res);
+	const body = await res.json();
+	return { newlyConfirmed: !!body.newly_confirmed };
+}
+
+// 저장된 토큰이 아직 유효한지 부작용 없이 확인한다(GET /api/me). 미확인 구독자의 토큰도 401이다.
+export async function fetchMe(accessToken: string, signal?: AbortSignal): Promise<void> {
+	const res = await authFetch('/api/me', accessToken, { signal });
+	if (!res.ok) throw await toApiError(res);
+}
+
 export function toReaderItem(c: ContentDetail): ReaderItem {
 	return {
 		title: c.title,

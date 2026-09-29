@@ -54,13 +54,23 @@ function readTokenFromHash(url: URL): string | null {
 
 export const auth = $state<{ status: AuthStatus }>({ status: 'unknown' });
 
+// 링크를 "처음" 열어서(서버가 newly_confirmed:true를 준 바로 그 순간) 가입이 막 완료된 상태를
+// 1회성으로 알린다. 홈 화면이 이걸 보고 "지금 홈 화면에 추가하세요" 안내를 딱 한 번 띄운다.
+// 링크를 다시 열거나(멱등) 저장된 토큰으로 재방문한 경우엔 절대 true가 안 된다.
+export const linkJustConfirmed = $state<{ value: boolean }>({ value: false });
+
+export function dismissJustConfirmed(): void {
+	linkJustConfirmed.value = false;
+}
+
 export async function initAuth(url: URL): Promise<void> {
 	const fromHash = readTokenFromHash(url);
 	if (fromHash) {
 		try {
-			await establishSession(fromHash);
+			const result = await establishSession(fromHash);
 			setToken(fromHash);
 			auth.status = 'subscriber';
+			linkJustConfirmed.value = result.newlyConfirmed;
 		} catch (err) {
 			if (err instanceof ApiError && err.status === 401) {
 				clearToken();

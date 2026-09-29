@@ -2,6 +2,7 @@
 	import Reader from '$lib/v2/Reader.svelte';
 	import { ApiError, getContent, getToday, toReaderItem } from '$lib/v2/api';
 	import type { ReaderItem } from '$lib/v2/types';
+	import { linkJustConfirmed, dismissJustConfirmed } from '$lib/v2/auth.svelte';
 
 	type Status =
 		| { kind: 'loading' }
@@ -37,6 +38,16 @@
 	<title>{status.kind === 'ready' ? status.item.title : '오늘의 질문'} · 매일함</title>
 </svelte:head>
 
+{#if linkJustConfirmed.value}
+	<!-- 링크를 처음 여는 순간(서버가 newly_confirmed:true를 준 바로 그 때)에만 한 번 뜬다.
+	     오늘의 질문 로딩 상태(status)와 무관하게 항상 보여야 한다 — 콘텐츠가 없는 날에도 가입은
+	     완료된 거라서, status.kind === 'ready' 안에 가두면 그런 날엔 배너가 영영 안 뜬다. -->
+	<div class="confirmed-banner" role="status">
+		<p>가입이 완료됐어요! 다음에 바로 들어오려면 <strong>지금 홈 화면에 추가</strong>해두세요.</p>
+		<button onclick={dismissJustConfirmed} aria-label="닫기">✕</button>
+	</div>
+{/if}
+
 {#if status.kind === 'ready'}
 	<Reader item={status.item} isToday />
 {:else if status.kind === 'loading'}
@@ -54,6 +65,36 @@
 {/if}
 
 <style>
+	.confirmed-banner {
+		display: flex;
+		align-items: flex-start;
+		gap: 12px;
+		margin: 20px 0 0;
+		padding: 14px 16px;
+		border-radius: 14px;
+		background: var(--v2-accent-soft);
+		font-size: 13px;
+		line-height: 1.6;
+		color: var(--v2-sub);
+	}
+	.confirmed-banner p {
+		flex: 1;
+		margin: 0;
+	}
+	.confirmed-banner strong {
+		color: var(--v2-ink);
+	}
+	.confirmed-banner button {
+		flex: none;
+		padding: 0;
+		border: 0;
+		background: none;
+		font-size: 16px;
+		line-height: 1;
+		color: var(--v2-mute);
+		cursor: pointer;
+	}
+
 	.msg {
 		padding-top: 96px;
 		text-align: center;

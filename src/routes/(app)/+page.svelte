@@ -1,8 +1,8 @@
 <script lang="ts">
-	import Reader from '$lib/v2/Reader.svelte';
-	import { ApiError, getContent, getToday, toReaderItem } from '$lib/v2/api';
-	import type { ReaderItem } from '$lib/v2/types';
-	import { linkJustConfirmed, dismissJustConfirmed } from '$lib/v2/auth.svelte';
+	import Reader from '$lib/Reader.svelte';
+	import { ApiError, getContent, getToday, toReaderItem } from '$lib/api';
+	import type { ReaderItem } from '$lib/types';
+	import { linkJustConfirmed, dismissJustConfirmed } from '$lib/auth.svelte';
 
 	type Status =
 		| { kind: 'loading' }
@@ -72,17 +72,17 @@
 		margin: 20px 0 0;
 		padding: 14px 16px;
 		border-radius: 14px;
-		background: var(--v2-accent-soft);
+		background: var(--accent-soft);
 		font-size: 13px;
 		line-height: 1.6;
-		color: var(--v2-sub);
+		color: var(--sub);
 	}
 	.confirmed-banner p {
 		flex: 1;
 		margin: 0;
 	}
 	.confirmed-banner strong {
-		color: var(--v2-ink);
+		color: var(--ink);
 	}
 	.confirmed-banner button {
 		flex: none;
@@ -91,14 +91,14 @@
 		background: none;
 		font-size: 16px;
 		line-height: 1;
-		color: var(--v2-mute);
+		color: var(--mute);
 		cursor: pointer;
 	}
 
 	.msg {
 		padding-top: 96px;
 		text-align: center;
-		color: var(--v2-sub);
+		color: var(--sub);
 	}
 	.msg p {
 		margin: 0;
@@ -110,7 +110,7 @@
 		padding: 0;
 		border: 0;
 		background: none;
-		color: var(--v2-accent-text);
+		color: var(--accent-text);
 		font: inherit;
 		font-weight: 600;
 		cursor: pointer;

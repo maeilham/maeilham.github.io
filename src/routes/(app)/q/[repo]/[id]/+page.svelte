@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import Reader from '$lib/v2/Reader.svelte';
-	import { ApiError, getContent, toReaderItem } from '$lib/v2/api';
-	import type { ReaderItem } from '$lib/v2/types';
+	import Reader from '$lib/Reader.svelte';
+	import { ApiError, getContent, toReaderItem } from '$lib/api';
+	import type { ReaderItem } from '$lib/types';
 
 	type Status =
 		| { kind: 'loading' }
@@ -55,7 +55,7 @@
 	.msg {
 		padding-top: 96px;
 		text-align: center;
-		color: var(--v2-sub);
+		color: var(--sub);
 	}
 	.msg p {
 		margin: 0;
@@ -67,7 +67,7 @@
 		padding: 0;
 		border: 0;
 		background: none;
-		color: var(--v2-accent-text);
+		color: var(--accent-text);
 		font: inherit;
 		font-weight: 600;
 		cursor: pointer;

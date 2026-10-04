@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { auth, initAuth } from '$lib/v2/auth.svelte';
+	import { auth, initAuth } from '$lib/auth.svelte';
 
 	let { children } = $props();
 
@@ -29,7 +29,7 @@
 	<meta name="theme-color" content="#f6f5f2" />
 </svelte:head>
 
-<div class="v2" class:with-tabs={!hideTabs}>
+<div class="app" class:with-tabs={!hideTabs}>
 	{@render children()}
 
 	{#if !hideTabs}
@@ -55,56 +55,56 @@
 
 <style>
 	:global(:root) {
-		--v2-bg: #f6f5f2;
-		--v2-surface: #ebe9e4;
-		--v2-ink: #1f231e;
-		--v2-sub: #4a4f46;
-		--v2-mute: #6b7067;
-		--v2-line: #dedcd5;
-		--v2-border: #c9c7be;
-		--v2-max: 640px; /* 콘텐츠 컬럼 최대 폭. 화면이 이보다 좁으면 화면 폭을 그대로 쓴다 */
-		--v2-accent: #4d7c3a;
-		--v2-accent-text: #3d6a2c;
-		--v2-accent-ink: #ffffff;
-		--v2-accent-soft: #e3ebd9;
-		--v2-warm: #d9651a;
-		--v2-warm-soft: #fbe7d6;
-		--v2-warm-text: #a34a0c;
-		--v2-mono: ui-monospace, 'SF Mono', 'DM Mono', Menlo, Consolas, monospace;
+		--bg: #f6f5f2;
+		--surface: #ebe9e4;
+		--ink: #1f231e;
+		--sub: #4a4f46;
+		--mute: #6b7067;
+		--line: #dedcd5;
+		--border: #c9c7be;
+		--max: 640px; /* 콘텐츠 컬럼 최대 폭. 화면이 이보다 좁으면 화면 폭을 그대로 쓴다 */
+		--accent: #4d7c3a;
+		--accent-text: #3d6a2c;
+		--accent-ink: #ffffff;
+		--accent-soft: #e3ebd9;
+		--warm: #d9651a;
+		--warm-soft: #fbe7d6;
+		--warm-text: #a34a0c;
+		--mono: ui-monospace, 'SF Mono', 'DM Mono', Menlo, Consolas, monospace;
 	}
 	/* TODO(dark): 다크모드는 후처리. 아래는 이전(파란 강조색) 팔레트라 새 웜그레이/올리브 그린 체계에 맞게
 	   다시 잡은 뒤 <html data-theme="dark">로 켠다. 지금은 어디서도 활성화되지 않는다. */
 	:global(:root[data-theme='dark']) {
-		--v2-bg: #17171c;
-		--v2-surface: #202027;
-		--v2-ink: #f2f4f6;
-		--v2-sub: #c3c8d0;
-		--v2-mute: #8b95a1;
-		--v2-line: #2c2c35;
-		--v2-accent: #4593fc;
-		--v2-accent-ink: #ffffff;
-		--v2-accent-soft: #1c2a3f;
+		--bg: #17171c;
+		--surface: #202027;
+		--ink: #f2f4f6;
+		--sub: #c3c8d0;
+		--mute: #8b95a1;
+		--line: #2c2c35;
+		--accent: #4593fc;
+		--accent-ink: #ffffff;
+		--accent-soft: #1c2a3f;
 	}
-	:global(body:has(.v2)) {
-		background: var(--v2-bg);
+	:global(body:has(.app)) {
+		background: var(--bg);
 	}
 
-	.v2 {
+	.app {
 		min-height: 100dvh;
-		max-width: var(--v2-max);
+		max-width: var(--max);
 		margin: 0 auto;
 		padding: 0 20px;
-		background: var(--v2-bg);
-		color: var(--v2-ink);
+		background: var(--bg);
+		color: var(--ink);
 		font-family: 'SF Pro KR', 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo',
 			'Noto Sans KR', sans-serif;
 		-webkit-font-smoothing: antialiased;
 		word-break: keep-all;
 	}
-	.v2.with-tabs {
+	.app.with-tabs {
 		padding-bottom: calc(72px + env(safe-area-inset-bottom));
 	}
-	.v2 :global(a) {
+	.app :global(a) {
 		color: inherit;
 	}
 
@@ -114,13 +114,13 @@
 		bottom: 0;
 		transform: translateX(-50%);
 		width: 100%;
-		max-width: var(--v2-max);
+		max-width: var(--max);
 		display: grid;
 		grid-auto-flow: column; /* 탭 개수와 관계없이 폭을 균등하게 나눈다 */
 		grid-auto-columns: 1fr;
 		padding-bottom: env(safe-area-inset-bottom);
-		background: var(--v2-bg);
-		border-top: 1px solid var(--v2-line);
+		background: var(--bg);
+		border-top: 1px solid var(--line);
 		z-index: 20;
 	}
 	.tab {
@@ -132,11 +132,11 @@
 		height: 56px;
 		font-size: 11px;
 		font-weight: 600;
-		color: var(--v2-mute);
+		color: var(--mute);
 		text-decoration: none;
 		-webkit-tap-highlight-color: transparent;
 	}
 	.tab.active {
-		color: var(--v2-ink);
+		color: var(--ink);
 	}
 </style>

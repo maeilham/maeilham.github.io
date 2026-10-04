@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import Notice from '$lib/v2/Notice.svelte';
-	import { ApiError, unsubscribe } from '$lib/v2/api';
+	import Notice from '$lib/Notice.svelte';
+	import { ApiError, unsubscribe } from '$lib/api';
 
 	const token = $derived(page.url.searchParams.get('token') ?? '');
 

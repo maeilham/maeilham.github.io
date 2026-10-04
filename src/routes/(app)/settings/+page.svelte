@@ -83,7 +83,7 @@
 	.email {
 		margin: 0;
 		font-size: 14px;
-		color: var(--v2-mute);
+		color: var(--mute);
 	}
 
 	.block {
@@ -98,7 +98,7 @@
 		margin: 0 0 8px;
 		font-size: 13px;
 		line-height: 1.6;
-		color: var(--v2-mute);
+		color: var(--mute);
 	}
 
 	.sources {
@@ -112,7 +112,7 @@
 		justify-content: space-between;
 		gap: 16px;
 		padding: 16px 0;
-		border-bottom: 1px solid var(--v2-line);
+		border-bottom: 1px solid var(--line);
 	}
 	.source-name {
 		margin: 0 0 2px;
@@ -122,7 +122,7 @@
 	.source-desc {
 		margin: 0;
 		font-size: 13px;
-		color: var(--v2-mute);
+		color: var(--mute);
 	}
 
 	.switch {
@@ -133,13 +133,13 @@
 		padding: 0;
 		border: 0;
 		border-radius: 999px;
-		background: var(--v2-border);
+		background: var(--border);
 		cursor: pointer;
 		transition: background 0.15s;
 		-webkit-tap-highlight-color: transparent;
 	}
 	.switch.on {
-		background: var(--v2-ink);
+		background: var(--ink);
 	}
 	.knob {
 		position: absolute;
@@ -163,7 +163,7 @@
 		padding: 8px 0;
 		border: 0;
 		background: none;
-		color: var(--v2-mute);
+		color: var(--mute);
 		font: inherit;
 		font-size: 14px;
 		text-decoration: underline;
@@ -190,8 +190,8 @@
 		cursor: pointer;
 	}
 	.ghost {
-		background: var(--v2-surface);
-		color: var(--v2-ink);
+		background: var(--surface);
+		color: var(--ink);
 	}
 	.warn {
 		background: #f04452;
@@ -201,7 +201,7 @@
 	.notice {
 		padding: 32px 20px;
 		border-radius: 16px;
-		background: var(--v2-surface);
+		background: var(--surface);
 		text-align: center;
 	}
 	.notice-title {
@@ -212,10 +212,10 @@
 	.notice-sub {
 		margin: 0 0 16px;
 		font-size: 14px;
-		color: var(--v2-sub);
+		color: var(--sub);
 	}
 	.notice a {
-		color: var(--v2-accent-text);
+		color: var(--accent-text);
 		font-weight: 600;
 	}
 </style>

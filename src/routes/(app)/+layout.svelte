@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { auth, initAuth } from '$lib/auth.svelte';
+	import ToastHost from '$lib/ToastHost.svelte';
 
 	let { children } = $props();
 
@@ -30,6 +31,8 @@
 
 <div class="app" class:with-tabs={!hideTabs}>
 	{@render children()}
+
+	<ToastHost />
 
 	{#if !hideTabs}
 		<nav class="tabbar" aria-label="주요 메뉴">

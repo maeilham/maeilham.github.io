@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { onDestroy } from 'svelte';
 	import {
 		ApiError,
 		fetchMe,
@@ -8,15 +9,25 @@
 		type RepoSubscription
 	} from '$lib/api';
 	import { auth, endSession, getAccessToken } from '$lib/auth.svelte';
+	import { showError } from '$lib/toast.svelte';
 
 	let email = $state('');
 	let sources = $state<RepoSubscription[]>([]);
 	let loadState = $state<'loading' | 'ready' | 'error'>('loading');
-	let pending = $state<Record<string, boolean>>({});
-	let actionError = $state<string | null>(null);
+	// 행마다의 저장 표시. 응답이 느릴 때만 스피너('saving')를 보여주고, 성공하면 체크('saved')를 잠깐
+	// 보여준 뒤 지운다. 실패하면 바로 비우고 오류 토스트로 알린다. 표시가 없어도 요청은 진행 중일 수
+	// 있어서(스피너를 늦게 띄우므로) 중복 요청 방지는 inflight로 따로 본다.
+	let rowState = $state<Record<string, 'saving' | 'saved'>>({});
+	let inflight = $state<Record<string, boolean>>({});
+	const timers: Record<string, ReturnType<typeof setTimeout>> = {};
 	let confirming = $state(false);
 	let unsubscribing = $state(false);
 	let unsubscribed = $state(false);
+
+	const SPINNER_DELAY_MS = 300; // 이보다 빨리 끝나면 스피너 없이 곧바로 체크
+	const SPINNER_MIN_MS = 400; // 스피너가 나타났으면 최소 이만큼은 보여준다(번쩍임 방지)
+	const SAVED_VISIBLE_MS = 1200;
+	const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 	const enabledCount = $derived(sources.filter((s) => s.enabled).length);
 
@@ -56,32 +67,50 @@
 	// 화면을 먼저 바꾸고 서버에 보낸다. 실패하면 되돌리고 안내한다.
 	async function toggle(s: RepoSubscription) {
 		const token = getAccessToken();
-		if (!token || pending[s.repo]) return;
+		if (!token || inflight[s.repo]) return;
 		const next = !s.enabled;
 		s.enabled = next;
-		pending[s.repo] = true;
-		actionError = null;
+		inflight[s.repo] = true;
+		clearTimeout(timers[s.repo]);
+		delete rowState[s.repo];
+
+		let spinnerShownAt = 0;
+		timers[s.repo] = setTimeout(() => {
+			spinnerShownAt = Date.now();
+			rowState[s.repo] = 'saving';
+		}, SPINNER_DELAY_MS);
+
 		try {
 			await setSubscription(token, s.repo, next);
+			clearTimeout(timers[s.repo]);
+			if (spinnerShownAt) {
+				const remain = SPINNER_MIN_MS - (Date.now() - spinnerShownAt);
+				if (remain > 0) await wait(remain);
+			}
+			rowState[s.repo] = 'saved';
+			timers[s.repo] = setTimeout(() => delete rowState[s.repo], SAVED_VISIBLE_MS);
 		} catch (err) {
+			clearTimeout(timers[s.repo]);
 			s.enabled = !next;
-			if (!handleAuthError(err)) actionError = '변경하지 못했어요. 잠시 뒤에 다시 시도해 주세요.';
+			delete rowState[s.repo];
+			if (!handleAuthError(err)) showError('변경하지 못했어요. 다시 시도해 주세요.');
 		} finally {
-			pending[s.repo] = false;
+			delete inflight[s.repo];
 		}
 	}
+
+	onDestroy(() => Object.values(timers).forEach(clearTimeout));
 
 	async function unsubscribe() {
 		const token = getAccessToken();
 		if (!token || unsubscribing) return;
 		unsubscribing = true;
-		actionError = null;
 		try {
 			await unsubscribeMe(token);
 			unsubscribed = true;
 			endSession();
 		} catch (err) {
-			if (!handleAuthError(err)) actionError = '해지하지 못했어요. 잠시 뒤에 다시 시도해 주세요.';
+			if (!handleAuthError(err)) showError('해지하지 못했어요. 다시 시도해 주세요.');
 		} finally {
 			unsubscribing = false;
 		}
@@ -133,22 +162,40 @@
 							<p class="source-name">{s.name}</p>
 							{#if s.description}<p class="source-desc">{s.description}</p>{/if}
 						</div>
-						<button
-							class="switch"
-							class:on={s.enabled}
-							role="switch"
-							aria-checked={s.enabled}
-							aria-label="{s.name} 받기"
-							disabled={pending[s.repo]}
-							onclick={() => toggle(s)}
-						>
-							<span class="knob"></span>
-						</button>
+						<div class="controls">
+							<!-- 상태 표시 자리를 항상 잡아둬서 나타나도 레이아웃이 밀리지 않는다 -->
+							<span class="status" aria-hidden="true">
+								{#if rowState[s.repo] === 'saving'}
+									<svg class="spinner" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+										<circle cx="12" cy="12" r="9" opacity="0.25" />
+										<path d="M21 12a9 9 0 0 0-9-9" />
+									</svg>
+								{:else if rowState[s.repo] === 'saved'}
+									<svg class="saved" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+										<path d="M5 12.5l4.5 4.5L19 7.5" />
+									</svg>
+								{/if}
+							</span>
+							<!-- 아이콘은 스크린리더에 안 읽히므로 같은 내용을 글로 알린다 -->
+							<span class="sr-only" role="status">
+								{rowState[s.repo] === 'saving' ? '저장 중' : rowState[s.repo] === 'saved' ? '저장됐어요' : ''}
+							</span>
+							<button
+								class="switch"
+								class:on={s.enabled}
+								role="switch"
+								aria-checked={s.enabled}
+								aria-label="{s.name} 받기"
+								disabled={inflight[s.repo]}
+								onclick={() => toggle(s)}
+							>
+								<span class="knob"></span>
+							</button>
+						</div>
 					</li>
 				{/each}
 			</ul>
 		{/if}
-		{#if actionError}<p class="error" role="alert">{actionError}</p>{/if}
 	</section>
 
 	<section class="block danger">
@@ -219,6 +266,65 @@
 		margin: 0;
 		font-size: 13px;
 		color: var(--mute);
+	}
+
+	.controls {
+		display: flex;
+		flex: none;
+		align-items: center;
+		gap: 12px;
+	}
+	.status {
+		display: grid;
+		place-items: center;
+		width: 18px;
+		height: 18px;
+		color: var(--mute);
+	}
+	.status .saved {
+		color: var(--accent-text);
+		animation: appear 150ms ease-out;
+	}
+	.spinner {
+		animation: spin 0.8s linear infinite;
+	}
+	@keyframes spin {
+		to {
+			transform: rotate(360deg);
+		}
+	}
+	@keyframes appear {
+		from {
+			opacity: 0;
+			transform: scale(0.8);
+		}
+		to {
+			opacity: 1;
+			transform: none;
+		}
+	}
+	/* 모션 줄이기: 회전 대신 천천히 깜빡인다 */
+	@media (prefers-reduced-motion: reduce) {
+		.spinner {
+			animation: pulse 1.2s ease-in-out infinite;
+		}
+		.status .saved {
+			animation: none;
+		}
+	}
+	@keyframes pulse {
+		50% {
+			opacity: 0.35;
+		}
+	}
+	.sr-only {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		margin: -1px;
+		overflow: hidden;
+		clip-path: inset(50%);
+		white-space: nowrap;
 	}
 
 	.switch {
@@ -332,11 +438,6 @@
 		font-size: 14px;
 		color: var(--mute);
 		text-align: center;
-	}
-	.error {
-		margin: 12px 0 0;
-		font-size: 13px;
-		color: #f04452;
 	}
 	.switch:disabled,
 	.confirm-actions button:disabled {

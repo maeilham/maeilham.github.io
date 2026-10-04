@@ -149,6 +149,25 @@ export async function getSubscriptions(accessToken: string, signal?: AbortSignal
 	return Array.isArray(body?.items) ? body.items : [];
 }
 
+// 개발 서버(pnpm dev)에서만 쓰는 테스트용 스위치. 설정 화면 주소에 ?delay=1500을 붙이면 분야 토글 요청을
+// 그만큼 늦추고(스피너 확인), ?fail을 붙이면 서버 오류로 실패시킨다(오류 토스트 확인).
+// import.meta.env.DEV는 운영 빌드에서 false로 치환되어 이 분기 전체가 번들에서 빠진다.
+async function applyDevOverrides(signal?: AbortSignal): Promise<void> {
+	if (!import.meta.env?.DEV || typeof location === 'undefined') return;
+	const q = new URLSearchParams(location.search);
+	const delay = Number(q.get('delay')) || 0;
+	if (delay > 0) {
+		await new Promise<void>((resolve, reject) => {
+			const t = setTimeout(resolve, delay);
+			signal?.addEventListener('abort', () => {
+				clearTimeout(t);
+				reject(new DOMException('aborted', 'AbortError'));
+			});
+		});
+	}
+	if (q.has('fail')) throw new ApiError(500, 'dev: forced failure');
+}
+
 // 분야 하나의 구독을 켜거나 끈다(PUT /api/me/subscriptions/{repo}). 멱등하다. 없는 분야는 404다.
 export async function setSubscription(
 	accessToken: string,
@@ -156,6 +175,7 @@ export async function setSubscription(
 	enabled: boolean,
 	signal?: AbortSignal
 ): Promise<void> {
+	await applyDevOverrides(signal);
 	const res = await authFetch(`/api/me/subscriptions/${encodeURIComponent(repo)}`, accessToken, {
 		method: 'PUT',
 		headers: { 'Content-Type': 'application/json' },

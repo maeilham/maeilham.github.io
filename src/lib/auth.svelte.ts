@@ -54,6 +54,17 @@ function readTokenFromHash(url: URL): string | null {
 
 export const auth = $state<{ status: AuthStatus }>({ status: 'unknown' });
 
+// 서버 호출에 붙일 개인 링크 토큰. 방문자(링크 없이 들어온 사람)면 null이다.
+export function getAccessToken(): string | null {
+	return getToken();
+}
+
+// 토큰을 버리고 방문자로 돌린다. 서버가 401을 줬거나(링크가 무효), 구독을 해지한 직후에 쓴다.
+export function endSession(): void {
+	clearToken();
+	auth.status = 'visitor';
+}
+
 // 링크를 "처음" 열어서(서버가 newly_confirmed:true를 준 바로 그 순간) 가입이 막 완료된 상태를
 // 1회성으로 알린다. 홈 화면이 이걸 보고 "지금 홈 화면에 추가하세요" 안내를 딱 한 번 띄운다.
 // 링크를 다시 열거나(멱등) 저장된 토큰으로 재방문한 경우엔 절대 true가 안 된다.

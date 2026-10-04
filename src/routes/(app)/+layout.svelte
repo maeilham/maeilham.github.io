@@ -14,8 +14,7 @@
 	const hideTabs = $derived(['/subscribe', '/confirm', '/unsubscribe'].includes(path));
 
 	// path는 끝의 /를 뗀 값이라 루트는 빈 문자열이다.
-	// 설정 탭은 구독자(auth.status === 'subscriber')에게만 보인다. 화면 자체는 아직 목(mock) 데이터다
-	// (settings/+page.svelte 참고) — 탭 노출만 먼저 하고, 실제 API 연결은 별도 작업이다.
+	// 설정 탭은 구독자(auth.status === 'subscriber')에게만 보인다.
 	const tabs = $derived([
 		{ href: '/', label: '오늘', match: (p: string) => p === '' },
 		{ href: '/archive', label: '지난 질문', match: (p: string) => p === '/archive' || p.startsWith('/q/') },

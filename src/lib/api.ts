@@ -121,9 +121,54 @@ export async function establishSession(accessToken: string, signal?: AbortSignal
 	return { newlyConfirmed: !!body.newly_confirmed };
 }
 
-// 저장된 토큰이 아직 유효한지 부작용 없이 확인한다(GET /api/me). 미확인 구독자의 토큰도 401이다.
-export async function fetchMe(accessToken: string, signal?: AbortSignal): Promise<void> {
+// GET /api/me 응답.
+export interface Me {
+	email: string;
+}
+
+// 저장된 토큰이 아직 유효한지 부작용 없이 확인하고 내 이메일을 받는다(GET /api/me). 미확인 구독자의 토큰도 401이다.
+export async function fetchMe(accessToken: string, signal?: AbortSignal): Promise<Me> {
 	const res = await authFetch('/api/me', accessToken, { signal });
+	if (!res.ok) throw await toApiError(res);
+	const body = await res.json();
+	return { email: String(body?.email ?? '') };
+}
+
+// GET /api/me/subscriptions 응답의 항목. 활성 분야 하나와 내 구독 여부다.
+export interface RepoSubscription {
+	repo: string;
+	name: string;
+	description: string;
+	enabled: boolean;
+}
+
+export async function getSubscriptions(accessToken: string, signal?: AbortSignal): Promise<RepoSubscription[]> {
+	const res = await authFetch('/api/me/subscriptions', accessToken, { signal });
+	if (!res.ok) throw await toApiError(res);
+	const body = await res.json();
+	return Array.isArray(body?.items) ? body.items : [];
+}
+
+// 분야 하나의 구독을 켜거나 끈다(PUT /api/me/subscriptions/{repo}). 멱등하다. 없는 분야는 404다.
+export async function setSubscription(
+	accessToken: string,
+	repo: string,
+	enabled: boolean,
+	signal?: AbortSignal
+): Promise<void> {
+	const res = await authFetch(`/api/me/subscriptions/${encodeURIComponent(repo)}`, accessToken, {
+		method: 'PUT',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify({ enabled }),
+		signal
+	});
+	if (!res.ok) throw await toApiError(res);
+}
+
+// 개인 링크 토큰으로 구독을 해지한다(POST /api/me/unsubscribe). 해지하면 그 토큰은 이후 401이다.
+// 메일 하단 링크로 해지하는 unsubscribe()와 결과는 같고 인증 수단만 다르다.
+export async function unsubscribeMe(accessToken: string, signal?: AbortSignal): Promise<void> {
+	const res = await authFetch('/api/me/unsubscribe', accessToken, { method: 'POST', signal });
 	if (!res.ok) throw await toApiError(res);
 }
 

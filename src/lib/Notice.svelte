@@ -45,10 +45,10 @@
 		margin: 0 0 8px;
 		font-size: 16px;
 		line-height: 1.7;
-		color: var(--v2-sub);
+		color: var(--sub);
 	}
 	.inner :global(.error) {
-		color: var(--v2-warm-text);
+		color: var(--warm-text);
 	}
 	.inner :global(.btn) {
 		display: flex;
@@ -59,8 +59,8 @@
 		margin-top: 24px;
 		border: 0;
 		border-radius: 14px;
-		background: var(--v2-ink);
-		color: var(--v2-bg);
+		background: var(--ink);
+		color: var(--bg);
 		font: inherit;
 		font-size: 16px;
 		font-weight: 700;
@@ -79,7 +79,7 @@
 		margin-top: 20px;
 		font-size: 15px;
 		font-weight: 600;
-		color: var(--v2-accent-text);
+		color: var(--accent-text);
 		text-decoration: none;
 	}
 	.inner :global(.link:hover) {
@@ -89,6 +89,6 @@
 	.foot {
 		padding-top: 32px;
 		font-size: 13px;
-		color: var(--v2-mute);
+		color: var(--mute);
 	}
 </style>

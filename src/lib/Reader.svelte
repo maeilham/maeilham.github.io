@@ -1,7 +1,7 @@
 <script lang="ts">
-	import type { ReaderItem } from '$lib/v2/types';
-	import { renderMarkdown } from '$lib/v2/markdown';
-	import { auth } from '$lib/v2/auth.svelte';
+	import type { ReaderItem } from '$lib/types';
+	import { renderMarkdown } from '$lib/markdown';
+	import { auth } from '$lib/auth.svelte';
 
 	let { item, isToday = false }: { item: ReaderItem; isToday?: boolean } = $props();
 
@@ -99,7 +99,7 @@
 		margin-bottom: 20px;
 		font-size: 14px;
 		font-weight: 600;
-		color: var(--v2-mute);
+		color: var(--mute);
 		text-decoration: none;
 	}
 
@@ -110,13 +110,13 @@
 		margin: 0 0 12px;
 		font-size: 13px;
 		font-weight: 600;
-		color: var(--v2-sub);
+		color: var(--sub);
 	}
 	.meta .dot {
-		color: var(--v2-mute);
+		color: var(--mute);
 	}
 	.mono {
-		font-family: var(--v2-mono);
+		font-family: var(--mono);
 	}
 
 	.title {
@@ -130,7 +130,7 @@
 		margin: 14px 0 0;
 		font-size: 16px;
 		line-height: 1.7;
-		color: var(--v2-sub);
+		color: var(--sub);
 	}
 	.tags {
 		display: flex;
@@ -143,9 +143,9 @@
 	.tags li {
 		padding: 4px 10px;
 		border-radius: 999px;
-		background: var(--v2-surface);
+		background: var(--surface);
 		font-size: 12px;
-		color: var(--v2-sub);
+		color: var(--sub);
 	}
 
 	/* 생각해보기 */
@@ -153,7 +153,7 @@
 		margin-top: 32px;
 		padding: 24px 20px;
 		border-radius: 16px;
-		background: var(--v2-surface);
+		background: var(--surface);
 	}
 	.think h2 {
 		margin: 0 0 6px;
@@ -164,7 +164,7 @@
 		margin: 0;
 		font-size: 14px;
 		line-height: 1.6;
-		color: var(--v2-sub);
+		color: var(--sub);
 	}
 
 	.sticky {
@@ -173,7 +173,7 @@
 		bottom: calc(56px + env(safe-area-inset-bottom) + 12px);
 		transform: translateX(-50%);
 		width: calc(100% - 40px);
-		max-width: calc(var(--v2-max) - 40px); /* 컬럼 폭 - 좌우 패딩 */
+		max-width: calc(var(--max) - 40px); /* 컬럼 폭 - 좌우 패딩 */
 		z-index: 10;
 	}
 
@@ -185,8 +185,8 @@
 		height: 52px;
 		border: 0;
 		border-radius: 14px;
-		background: var(--v2-ink);
-		color: var(--v2-bg);
+		background: var(--ink);
+		color: var(--bg);
 		font: inherit;
 		font-size: 16px;
 		font-weight: 700;
@@ -198,11 +198,11 @@
 		opacity: 0.85;
 	}
 	.primary:focus-visible {
-		outline: 3px solid var(--v2-border);
+		outline: 3px solid var(--border);
 		outline-offset: 2px;
 	}
 	.reply .primary {
-		color: var(--v2-bg);
+		color: var(--bg);
 	}
 	/* 보조 버튼: 주 CTA(내 답 남기기)와 구분되는 옅은 회색 */
 	.secondary {
@@ -213,8 +213,8 @@
 		height: 52px;
 		margin-top: 10px;
 		border-radius: 14px;
-		background: var(--v2-surface);
-		color: var(--v2-ink);
+		background: var(--surface);
+		color: var(--ink);
 		font-size: 16px;
 		font-weight: 600;
 		text-decoration: none;
@@ -227,7 +227,7 @@
 		opacity: 0.85;
 	}
 	.secondary:focus-visible {
-		outline: 3px solid var(--v2-border);
+		outline: 3px solid var(--border);
 		outline-offset: 2px;
 	}
 
@@ -235,7 +235,7 @@
 	.prose {
 		margin-top: 32px;
 		padding-top: 28px;
-		border-top: 1px solid var(--v2-line);
+		border-top: 1px solid var(--line);
 		font-size: 17px;
 		line-height: 1.85;
 	}
@@ -257,7 +257,7 @@
 		margin-bottom: 6px;
 	}
 	.prose :global(a) {
-		color: var(--v2-accent-text);
+		color: var(--accent-text);
 		text-underline-offset: 3px;
 	}
 	.prose :global(.table-wrap) {
@@ -275,13 +275,13 @@
 	.prose :global(th),
 	.prose :global(td) {
 		padding: 10px 12px;
-		border-bottom: 1px solid var(--v2-line);
+		border-bottom: 1px solid var(--line);
 		text-align: left;
 		vertical-align: top;
 	}
 	.prose :global(th) {
 		font-weight: 700;
-		background: var(--v2-surface);
+		background: var(--surface);
 	}
 
 	/* 본문 - 마크다운이 만드는 나머지 요소 */
@@ -301,8 +301,8 @@
 	.prose :global(blockquote) {
 		margin: 0 0 18px;
 		padding: 2px 0 2px 16px;
-		border-left: 3px solid var(--v2-border);
-		color: var(--v2-sub);
+		border-left: 3px solid var(--border);
+		color: var(--sub);
 	}
 	.prose :global(blockquote > :last-child) {
 		margin-bottom: 0;
@@ -310,7 +310,7 @@
 	.prose :global(hr) {
 		margin: 28px 0;
 		border: 0;
-		border-top: 1px solid var(--v2-line);
+		border-top: 1px solid var(--line);
 	}
 	.prose :global(img) {
 		display: block;
@@ -322,8 +322,8 @@
 	.prose :global(code) {
 		padding: 2px 6px;
 		border-radius: 6px;
-		background: var(--v2-surface);
-		font-family: var(--v2-mono);
+		background: var(--surface);
+		font-family: var(--mono);
 		font-size: 0.88em;
 	}
 	.prose :global(pre) {
@@ -331,7 +331,7 @@
 		padding: 14px 16px;
 		overflow-x: auto; /* 폰에서 긴 줄은 가로 스크롤 */
 		border-radius: 12px;
-		background: var(--v2-surface);
+		background: var(--surface);
 		font-size: 13px;
 		line-height: 1.7;
 		word-break: normal;
@@ -344,17 +344,17 @@
 		font-size: inherit;
 	}
 
-	/* 코드 하이라이트 - 색은 v2 토큰만 쓴다(녹색/주황을 은근히) */
+	/* 코드 하이라이트 - 색은 디자인 토큰만 쓴다(녹색/주황을 은근히) */
 	.prose :global(.hljs-comment),
 	.prose :global(.hljs-quote),
 	.prose :global(.hljs-meta) {
-		color: var(--v2-mute);
+		color: var(--mute);
 		font-style: italic;
 	}
 	.prose :global(.hljs-keyword),
 	.prose :global(.hljs-selector-tag),
 	.prose :global(.hljs-doctag) {
-		color: var(--v2-accent-text);
+		color: var(--accent-text);
 		font-weight: 600;
 	}
 	.prose :global(.hljs-string),
@@ -363,12 +363,12 @@
 	.prose :global(.hljs-literal),
 	.prose :global(.hljs-symbol),
 	.prose :global(.hljs-bullet) {
-		color: var(--v2-warm-text);
+		color: var(--warm-text);
 	}
 	.prose :global(.hljs-title),
 	.prose :global(.hljs-section),
 	.prose :global(.hljs-built_in) {
-		color: var(--v2-ink);
+		color: var(--ink);
 		font-weight: 600;
 	}
 	.prose :global(.hljs-attr),
@@ -377,7 +377,7 @@
 	.prose :global(.hljs-type),
 	.prose :global(.hljs-variable),
 	.prose :global(.hljs-params) {
-		color: var(--v2-sub);
+		color: var(--sub);
 	}
 
 	/* 커뮤니티 노트 */
@@ -385,7 +385,7 @@
 		margin-top: 12px;
 		padding: 20px;
 		border-radius: 16px;
-		background: var(--v2-surface);
+		background: var(--surface);
 	}
 	.notes h2 {
 		margin: 0;
@@ -395,13 +395,13 @@
 	.notes-sub {
 		margin: 4px 0 12px;
 		font-size: 12px;
-		color: var(--v2-mute);
+		color: var(--mute);
 	}
 	.notes-body :global(p) {
 		margin: 0;
 		font-size: 15px;
 		line-height: 1.75;
-		color: var(--v2-sub);
+		color: var(--sub);
 	}
 
 	/* 답변 유도 */
@@ -416,14 +416,14 @@
 	.reply p {
 		margin: 0 0 16px;
 		font-size: 14px;
-		color: var(--v2-sub);
+		color: var(--sub);
 	}
 
 	/* 완료 */
 	.complete {
 		margin-top: 40px;
 		padding: 32px 0 8px;
-		border-top: 1px solid var(--v2-line);
+		border-top: 1px solid var(--line);
 		text-align: center;
 	}
 	.complete-title {
@@ -434,6 +434,6 @@
 	.complete-sub {
 		margin: 6px 0 0;
 		font-size: 14px;
-		color: var(--v2-mute);
+		color: var(--mute);
 	}
 </style>

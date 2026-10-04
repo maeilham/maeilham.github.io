@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { getContentList, type ContentSummary } from '$lib/v2/api';
-	import { ALL_REPOS, dateLabel, filterByRepo, repoNames } from '$lib/v2/list';
+	import { getContentList, type ContentSummary } from '$lib/api';
+	import { ALL_REPOS, dateLabel, filterByRepo, repoNames } from '$lib/list';
 
 	type Status = { kind: 'loading' } | { kind: 'ready'; items: ContentSummary[] } | { kind: 'error' };
 
@@ -84,13 +84,13 @@
 	.head p {
 		margin: 0;
 		font-size: 14px;
-		color: var(--v2-mute);
+		color: var(--mute);
 	}
 
 	.msg {
 		padding-top: 48px;
 		text-align: center;
-		color: var(--v2-sub);
+		color: var(--sub);
 	}
 	.msg p {
 		margin: 0;
@@ -100,7 +100,7 @@
 		padding: 0;
 		border: 0;
 		background: none;
-		color: var(--v2-accent-text);
+		color: var(--accent-text);
 		font: inherit;
 		font-weight: 600;
 		cursor: pointer;
@@ -123,16 +123,16 @@
 		padding: 0 14px;
 		border: 0;
 		border-radius: 999px;
-		background: var(--v2-surface);
-		color: var(--v2-sub);
+		background: var(--surface);
+		color: var(--sub);
 		font: inherit;
 		font-size: 14px;
 		font-weight: 600;
 		cursor: pointer;
 	}
 	.chip.on {
-		background: var(--v2-ink);
-		color: var(--v2-bg);
+		background: var(--ink);
+		color: var(--bg);
 	}
 
 	.list {
@@ -143,7 +143,7 @@
 	.row {
 		display: block;
 		padding: 16px 0;
-		border-bottom: 1px solid var(--v2-line);
+		border-bottom: 1px solid var(--line);
 		text-decoration: none;
 		-webkit-tap-highlight-color: transparent;
 	}
@@ -156,7 +156,7 @@
 		gap: 8px;
 		margin: 0 0 4px;
 		font-size: 12px;
-		color: var(--v2-mute);
+		color: var(--mute);
 	}
 	.row-title {
 		margin: 0;
@@ -169,6 +169,6 @@
 		padding: 48px 0;
 		text-align: center;
 		font-size: 14px;
-		color: var(--v2-mute);
+		color: var(--mute);
 	}
 </style>

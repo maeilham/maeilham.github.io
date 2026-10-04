@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { SubscribeForm } from '$lib/v2/subscribe.svelte';
+	import { SubscribeForm } from '$lib/subscribe.svelte';
 
 	// 이메일 형식이 맞을 때만 버튼을 활성화한다(form.valid). 성공해도 메일의 링크를 눌러야 구독이 확정된다.
 	const form = new SubscribeForm();
@@ -99,7 +99,7 @@
 		align-self: flex-start;
 		font-size: 14px;
 		font-weight: 600;
-		color: var(--v2-mute);
+		color: var(--mute);
 		text-decoration: none;
 	}
 
@@ -111,18 +111,18 @@
 	.form input {
 		height: 52px;
 		padding: 0 16px;
-		border: 1px solid var(--v2-border);
+		border: 1px solid var(--border);
 		border-radius: 14px;
-		background: var(--v2-bg);
-		color: var(--v2-ink);
+		background: var(--bg);
+		color: var(--ink);
 		font: inherit;
 		font-size: 16px; /* iOS 자동 확대 방지 */
 	}
 	.form input::placeholder {
-		color: var(--v2-mute);
+		color: var(--mute);
 	}
 	.form input:focus {
-		outline: 2px solid var(--v2-accent);
+		outline: 2px solid var(--accent);
 		outline-offset: -1px;
 		border-color: transparent;
 	}
@@ -130,8 +130,8 @@
 		height: 52px;
 		border: 0;
 		border-radius: 14px;
-		background: var(--v2-ink);
-		color: var(--v2-bg);
+		background: var(--ink);
+		color: var(--bg);
 		font: inherit;
 		font-size: 16px;
 		font-weight: 700;
@@ -141,26 +141,26 @@
 		opacity: 0.85;
 	}
 	.form button:disabled {
-		background: var(--v2-line);
-		color: var(--v2-mute);
+		background: var(--line);
+		color: var(--mute);
 		cursor: not-allowed;
 	}
 	.error {
 		margin: 12px 0 0;
 		font-size: 14px;
-		color: var(--v2-warm-text);
+		color: var(--warm-text);
 	}
 	.note {
 		margin: 12px 0 0;
 		font-size: 13px;
-		color: var(--v2-mute);
+		color: var(--mute);
 	}
 
 	.sent {
 		margin-top: 24px;
 		padding: 20px;
 		border-radius: 14px;
-		background: var(--v2-accent-soft);
+		background: var(--accent-soft);
 	}
 	.sent-title {
 		margin: 0 0 8px;
@@ -171,7 +171,7 @@
 		margin: 0 0 4px;
 		font-size: 14px;
 		line-height: 1.6;
-		color: var(--v2-sub);
+		color: var(--sub);
 		overflow-wrap: anywhere;
 	}
 	.link {
@@ -179,7 +179,7 @@
 		margin-top: 20px;
 		font-size: 15px;
 		font-weight: 600;
-		color: var(--v2-accent-text);
+		color: var(--accent-text);
 		text-decoration: none;
 	}
 	.link:hover {
@@ -201,7 +201,7 @@
 		gap: 14px;
 		font-size: 17px;
 		line-height: 1.5;
-		color: var(--v2-ink);
+		color: var(--ink);
 	}
 	.num {
 		display: inline-flex;
@@ -210,16 +210,16 @@
 		width: 24px;
 		height: 24px;
 		border-radius: 50%;
-		background: var(--v2-surface);
-		font-family: var(--v2-mono);
+		background: var(--surface);
+		font-family: var(--mono);
 		font-size: 12px;
 		font-weight: 600;
-		color: var(--v2-ink);
+		color: var(--ink);
 	}
 
 	.foot {
 		padding-top: 32px;
 		font-size: 13px;
-		color: var(--v2-mute);
+		color: var(--mute);
 	}
 </style>

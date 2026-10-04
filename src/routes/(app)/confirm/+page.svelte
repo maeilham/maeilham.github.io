@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import Notice from '$lib/v2/Notice.svelte';
+	import Notice from '$lib/Notice.svelte';
 
 	// 서버가 확인 링크를 처리한 뒤 ?status=confirmed 또는 ?status=invalid로 보낸다.
 	// 알 수 없는 값(주소를 직접 연 경우 등)은 성공으로 보여주지 않고 실패 안내를 쓴다.

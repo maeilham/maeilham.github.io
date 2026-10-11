@@ -2,8 +2,15 @@
 	import { page } from '$app/state';
 	import { auth, initAuth } from '$lib/auth.svelte';
 	import ToastHost from '$lib/ToastHost.svelte';
+	import { onMount } from 'svelte';
+	import { isMock, mountMockBadge } from '$lib/dev-mock';
 
 	let { children } = $props();
+
+	// 개발 서버에서 ?mock으로 열었을 때만 "MOCK" 표시를 단다(서버를 부르지 않는 가짜 데이터 화면이라는 뜻).
+	onMount(() => {
+		if (import.meta.env?.DEV && isMock()) return mountMockBadge();
+	});
 
 	// 클라이언트에서만 실행된다(sessionStorage). 주소가 바뀔 때(라우트 이동, #t= 재진입)마다 다시 확인한다.
 	$effect(() => {

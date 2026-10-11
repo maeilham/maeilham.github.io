@@ -10,6 +10,7 @@
 // 화면은 'visitor'일 때만 구독 UI를 그린다. 네트워크 오류 등 401이 아닌 실패는 상태를 바꾸지
 // 않는다('unknown' 유지) — 잘못 방문자로 단정해서 구독 유도 문구를 잘못 보여주는 것보다 안전하다.
 import { ApiError, establishSession, fetchMe } from './api';
+import { fakeToken } from './dev-mock';
 
 export type AuthStatus = 'unknown' | 'subscriber' | 'visitor';
 
@@ -20,6 +21,11 @@ const TOKEN_RE = /^[0-9a-f]{64}$/;
 let memoryToken: string | null = null;
 
 function getToken(): string | null {
+	// 개발 서버의 ?mock 모드에서는 저장된 토큰이 없어도 구독자로 본다(UI 테스트용). 운영 빌드에서는 빠진다.
+	if (import.meta.env?.DEV) {
+		const fake = fakeToken();
+		if (fake) return fake;
+	}
 	try {
 		return sessionStorage.getItem(STORAGE_KEY) ?? memoryToken;
 	} catch {

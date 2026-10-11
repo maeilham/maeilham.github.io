@@ -21,12 +21,11 @@
 	let rowState = $state<Record<string, 'saving' | 'saved'>>({});
 	let inflight = $state<Record<string, boolean>>({});
 	const timers: Record<string, ReturnType<typeof setTimeout>> = {};
-	let confirming = $state(false);
-	let unsubscribing = $state(false);
-	let unsubscribed = $state(false);
-	let confirmingRotate = $state(false);
-	let rotating = $state(false);
-	let rotated = $state(false);
+	// 어느 확인 창이 열려 있나(한 번에 하나만 열린다), 요청이 진행 중인가(동작은 한 번에 하나만 하므로 공용),
+	// 끝난 결과(완료 안내 화면 선택용). 서로 겹치지 않는 개념이라 불리언을 나누지 않고 값으로 표현한다.
+	let confirming = $state<'rotate' | 'unsubscribe' | null>(null);
+	let busy = $state(false);
+	let finished = $state<'rotated' | 'unsubscribed' | null>(null);
 
 	const SPINNER_DELAY_MS = 300; // 이보다 빨리 끝나면 스피너 없이 곧바로 체크
 	const SPINNER_MIN_MS = 400; // 스피너가 나타났으면 최소 이만큼은 보여준다(번쩍임 방지)
@@ -60,7 +59,7 @@
 
 	// 구독자로 확인된 뒤에 불러온다. 판정 전('unknown')에는 기다리고, 방문자면 불러오지 않는다.
 	$effect(() => {
-		if (auth.status !== 'subscriber' || unsubscribed || rotated) return;
+		if (auth.status !== 'subscriber' || finished) return;
 		const token = getAccessToken();
 		if (!token) return;
 		const ctrl = new AbortController();
@@ -105,44 +104,34 @@
 
 	onDestroy(() => Object.values(timers).forEach(clearTimeout));
 
-	// 확인 단계는 한 번에 하나만 열어 둔다.
-	function openRotateConfirm() {
-		confirmingRotate = true;
-		confirming = false;
-	}
-	function openUnsubscribeConfirm() {
-		confirming = true;
-		confirmingRotate = false;
-	}
-
 	// 새 링크는 메일로만 간다. 성공하면 지금 토큰은 이미 무효라서 이 기기도 로그아웃하고 안내만 보여준다.
 	async function rotate() {
 		const token = getAccessToken();
-		if (!token || rotating) return;
-		rotating = true;
+		if (!token || busy) return;
+		busy = true;
 		try {
 			await rotateLink(token);
-			rotated = true;
+			finished = 'rotated';
 			endSession();
 		} catch (err) {
 			if (!handleAuthError(err)) showError('새 링크를 보내지 못했어요. 다시 시도해 주세요.');
 		} finally {
-			rotating = false;
+			busy = false;
 		}
 	}
 
 	async function unsubscribe() {
 		const token = getAccessToken();
-		if (!token || unsubscribing) return;
-		unsubscribing = true;
+		if (!token || busy) return;
+		busy = true;
 		try {
 			await unsubscribeMe(token);
-			unsubscribed = true;
+			finished = 'unsubscribed';
 			endSession();
 		} catch (err) {
 			if (!handleAuthError(err)) showError('해지하지 못했어요. 다시 시도해 주세요.');
 		} finally {
-			unsubscribing = false;
+			busy = false;
 		}
 	}
 </script>
@@ -156,13 +145,13 @@
 	{#if email}<p class="email">{email}</p>{/if}
 </header>
 
-{#if unsubscribed}
+{#if finished === 'unsubscribed'}
 	<div class="notice" role="status">
 		<p class="notice-title">구독이 해지됐어요</p>
 		<p class="notice-sub">그동안 함께해서 고마웠어요. 언제든 다시 구독할 수 있어요.</p>
 		<a href="/">처음으로</a>
 	</div>
-{:else if rotated}
+{:else if finished === 'rotated'}
 	<div class="notice" role="status">
 		<p class="notice-title">새 링크를 메일로 보냈어요</p>
 		<p class="notice-sub">
@@ -239,33 +228,33 @@
 	<section class="block" aria-labelledby="link-title">
 		<h2 id="link-title">나만의 링크</h2>
 		<p class="hint">나만의 링크가 다른 사람에게 알려졌다면 새로 받을 수 있어요. 새 링크는 가입한 메일로 보내드려요.</p>
-		{#if confirmingRotate}
+		{#if confirming === 'rotate'}
 			<p class="confirm-text">나만의 링크를 새로 받을까요?</p>
 			<p class="hint">
 				이 기기와 다른 기기의 북마크, 홈 화면 바로가기가 모두 끊겨요. 메일로 받은 새 링크로 다시 들어와야 해요.
 			</p>
 			<div class="confirm-actions">
-				<button class="ghost" onclick={() => (confirmingRotate = false)} disabled={rotating}>취소</button>
-				<button class="solid" onclick={rotate} disabled={rotating}>
-					{rotating ? '보내는 중…' : '새로 받기'}
+				<button class="ghost" onclick={() => (confirming = null)} disabled={busy}>취소</button>
+				<button class="solid" onclick={rotate} disabled={busy}>
+					{busy ? '보내는 중…' : '새로 받기'}
 				</button>
 			</div>
 		{:else}
-			<button class="rotate-btn" onclick={openRotateConfirm}>나만의 링크 새로 받기</button>
+			<button class="rotate-btn" onclick={() => (confirming = 'rotate')}>나만의 링크 새로 받기</button>
 		{/if}
 	</section>
 
 	<section class="block danger">
-		{#if confirming}
+		{#if confirming === 'unsubscribe'}
 			<p class="confirm-text">정말 구독을 해지할까요?</p>
 			<div class="confirm-actions">
-				<button class="ghost" onclick={() => (confirming = false)} disabled={unsubscribing}>취소</button>
-				<button class="warn" onclick={unsubscribe} disabled={unsubscribing}>
-					{unsubscribing ? '해지하는 중…' : '해지하기'}
+				<button class="ghost" onclick={() => (confirming = null)} disabled={busy}>취소</button>
+				<button class="warn" onclick={unsubscribe} disabled={busy}>
+					{busy ? '해지하는 중…' : '해지하기'}
 				</button>
 			</div>
 		{:else}
-			<button class="link-danger" onclick={openUnsubscribeConfirm}>구독 해지</button>
+			<button class="link-danger" onclick={() => (confirming = 'unsubscribe')}>구독 해지</button>
 		{/if}
 	</section>
 {/if}

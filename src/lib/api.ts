@@ -1,4 +1,5 @@
 import type { ReaderItem } from './types';
+import { devResponse } from './dev-mock';
 
 // 서버(Go) API 주소. 터미널 화면과 같은 환경변수를 쓴다.
 // import.meta.env는 vite가 채워주며, 없는 환경(예: node로 직접 실행)에서는 기본값을 쓴다.
@@ -100,6 +101,11 @@ export async function unsubscribe(token: string, signal?: AbortSignal): Promise<
 // 개인 링크 토큰(access token)을 Authorization 헤더로 붙여서 보낸다. 쿼리에 넣지 않는 이유는
 // 서버 로그나 프록시에 남지 않게 하려는 것이다(해지 토큰의 ?token=과는 다른 체계).
 async function authFetch(path: string, accessToken: string, init?: RequestInit): Promise<Response> {
+	// 개발 서버에서만: UI 테스트용 가짜 응답(?mock, ?fail, ?delay). 운영 빌드에서는 이 분기가 통째로 빠진다.
+	if (import.meta.env?.DEV) {
+		const fake = await devResponse(path, init?.method ?? 'GET', init?.signal ?? undefined);
+		if (fake) return fake;
+	}
 	return fetch(`${API_URL}${path}`, {
 		...init,
 		headers: { ...init?.headers, Authorization: `Bearer ${accessToken}` }
@@ -149,25 +155,6 @@ export async function getSubscriptions(accessToken: string, signal?: AbortSignal
 	return Array.isArray(body?.items) ? body.items : [];
 }
 
-// 개발 서버(pnpm dev)에서만 쓰는 테스트용 스위치. 설정 화면 주소에 ?delay=1500을 붙이면 분야 토글 요청을
-// 그만큼 늦추고(스피너 확인), ?fail을 붙이면 서버 오류로 실패시킨다(오류 토스트 확인).
-// import.meta.env.DEV는 운영 빌드에서 false로 치환되어 이 분기 전체가 번들에서 빠진다.
-async function applyDevOverrides(signal?: AbortSignal): Promise<void> {
-	if (!import.meta.env?.DEV || typeof location === 'undefined') return;
-	const q = new URLSearchParams(location.search);
-	const delay = Number(q.get('delay')) || 0;
-	if (delay > 0) {
-		await new Promise<void>((resolve, reject) => {
-			const t = setTimeout(resolve, delay);
-			signal?.addEventListener('abort', () => {
-				clearTimeout(t);
-				reject(new DOMException('aborted', 'AbortError'));
-			});
-		});
-	}
-	if (q.has('fail')) throw new ApiError(500, 'dev: forced failure');
-}
-
 // 분야 하나의 구독을 켜거나 끈다(PUT /api/me/subscriptions/{repo}). 멱등하다. 없는 분야는 404다.
 export async function setSubscription(
 	accessToken: string,
@@ -175,13 +162,20 @@ export async function setSubscription(
 	enabled: boolean,
 	signal?: AbortSignal
 ): Promise<void> {
-	await applyDevOverrides(signal);
 	const res = await authFetch(`/api/me/subscriptions/${encodeURIComponent(repo)}`, accessToken, {
 		method: 'PUT',
 		headers: { 'Content-Type': 'application/json' },
 		body: JSON.stringify({ enabled }),
 		signal
 	});
+	if (!res.ok) throw await toApiError(res);
+}
+
+// 개인 링크를 새로 만든다(POST /api/me/rotate-link). 링크가 유출됐을 때 옛 링크를 무효로 만드는 용도다.
+// 새 링크는 응답이 아니라 가입한 이메일로만 간다(유출된 링크를 가진 사람이 눌러도 새 링크를 얻지 못한다).
+// 성공하면 지금 토큰은 이미 무효이므로, 부른 쪽은 토큰을 버리고 메일의 새 링크로 다시 들어오게 안내해야 한다.
+export async function rotateLink(accessToken: string, signal?: AbortSignal): Promise<void> {
+	const res = await authFetch('/api/me/rotate-link', accessToken, { method: 'POST', signal });
 	if (!res.ok) throw await toApiError(res);
 }
 

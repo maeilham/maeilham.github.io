@@ -13,4 +13,6 @@ export interface ReaderItem {
 	notes?: string | null;
 	discussionUrl?: string; // 없으면 "내 답 남기기"를 숨긴다
 	read?: boolean;
+	review?: boolean; // 이미 나온 글을 다시 보여 주는 복습이면 true(오늘의 질문일 때만). 기여 안내를 그린다
+	previousDay?: string; // 복습이면 이 글이 마지막으로 오늘의 질문이었던 날('YYYY-MM-DD'). 새 글이거나 서버가 안 주면 없음
 }

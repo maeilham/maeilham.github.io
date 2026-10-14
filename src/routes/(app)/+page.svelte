@@ -23,7 +23,7 @@
 			try {
 				const today = await getToday(ctrl.signal);
 				const content = await getContent(today.repo, today.id, ctrl.signal);
-				if (!ctrl.signal.aborted) status = { kind: 'ready', item: toReaderItem(content) };
+				if (!ctrl.signal.aborted) status = { kind: 'ready', item: { ...toReaderItem(content), review: today.review, previousDay: today.previousDay } };
 			} catch (e) {
 				if (ctrl.signal.aborted) return;
 				// 글이 하나도 없거나(오늘의 질문 404), 그 사이 삭제됐으면(상세 404) "아직 없음"으로 본다

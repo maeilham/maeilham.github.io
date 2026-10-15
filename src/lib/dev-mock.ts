@@ -4,14 +4,15 @@
 // 주소에 쿼리를 붙여서 쓴다.
 //   ?mock            서버를 부르지 않고 구독자 상태 + 가짜 데이터로 화면을 연다. 화면을 옮겨도 유지되고(sessionStorage), ?mock=off로 끈다.
 //   ?delay=1500      응답을 그만큼 늦춘다(스피너, 로딩 상태 확인). mock이 아니어도 실제 서버 호출에 적용된다.
-//   ?fail=rotate     그 동작을 실패시킨다(서버를 부르지 않음). 동작: me, list, toggle, rotate, unsub, session.
+//   ?review          오늘의 질문을 "복습"으로 내려준다(뱃지와 기여 안내 확인용). ?review=0이면 새 글. ?mock일 때만 동작.
+//   ?fail=rotate     그 동작을 실패시킨다(서버를 부르지 않음). 동작: me, list, toggle, rotate, unsub, session, today, content.
 //                    ?fail만 쓰면 toggle. 상태 코드는 &status=401처럼 정하고 기본은 500이다.
 // 예) /settings?mock&fail=rotate&status=500  → 링크 새로 받기 실패 토스트 확인
 export const DEV_MOCK_MARKER = '__dev_mock__';
 
 const STORAGE_KEY = 'maeilham.devmock';
 
-type Action = 'me' | 'list' | 'toggle' | 'rotate' | 'unsub' | 'session';
+type Action = 'me' | 'list' | 'toggle' | 'rotate' | 'unsub' | 'session' | 'today' | 'content';
 
 function query(): URLSearchParams {
 	return typeof location === 'undefined' ? new URLSearchParams() : new URLSearchParams(location.search);
@@ -40,6 +41,8 @@ function classify(path: string, method: string): Action | null {
 	if (path.startsWith('/api/me/subscriptions/') && method === 'PUT') return 'toggle';
 	if (path === '/api/me/rotate-link') return 'rotate';
 	if (path === '/api/me/unsubscribe') return 'unsub';
+	if (path === '/api/today') return 'today';
+	if (path.startsWith('/api/contents/') && method === 'GET') return 'content';
 	return null;
 }
 
@@ -47,8 +50,45 @@ function json(status: number, body: unknown): Response {
 	return new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } });
 }
 
-function successBody(action: Action): unknown {
+const MOCK_BODY = `이 글은 개발용 가짜 데이터예요. 서버를 부르지 않고 화면만 확인하려는 용도입니다.
+
+**첫 문단**을 길게 늘려서 줄바꿈이 어떻게 보이는지도 확인해 볼 수 있어요. 가운데에 \`코드\`도 한 번 넣어 봅니다.
+
+\`\`\`go
+func main() {
+    fmt.Println("mock")
+}
+\`\`\`
+
+## 참고
+
+- 개발 서버에서만 보이고 운영 빌드에는 들어가지 않아요.`;
+
+function successBody(action: Action, q: URLSearchParams): unknown {
 	switch (action) {
+		case 'today':
+			return {
+				item: {
+					repo: 'bops',
+					repoName: '백엔드 · 인프라',
+					id: '0001',
+					title: '오늘의 질문 예시: 화면 확인용 제목이에요',
+					preview: '개발용 가짜 데이터의 미리보기입니다. 실제 질문이 아니에요.',
+					tags: ['mock', 'ui'],
+					...(q.has('review') && q.get('review') !== '0' ? { review: true, previousDay: '2026-10-09' } : { review: false })
+				}
+			};
+		case 'content':
+			return {
+				repo: 'bops',
+				repoName: '백엔드 · 인프라',
+				id: '0001',
+				title: '오늘의 질문 예시: 화면 확인용 제목이에요',
+				preview: '개발용 가짜 데이터의 미리보기입니다. 실제 질문이 아니에요.',
+				tags: ['mock', 'ui'],
+				body: MOCK_BODY,
+				discussionUrl: 'https://github.com/maeilham/backend-ops/discussions/1'
+			};
 		case 'session':
 			return { status: 'subscriber', newly_confirmed: false };
 		case 'me':
@@ -98,7 +138,7 @@ export async function devResponse(path: string, method: string, signal?: AbortSi
 			return json(status, { error: 'dev: forced failure' });
 		}
 	}
-	if (mock && action) return json(200, successBody(action));
+	if (mock && action) return json(200, successBody(action, q));
 	return null;
 }
 

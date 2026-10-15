@@ -2,13 +2,19 @@
 	import type { ReaderItem } from '$lib/types';
 	import { renderMarkdown } from '$lib/markdown';
 	import { auth } from '$lib/auth.svelte';
+	import { previousDayLabel } from '$lib/list';
 
 	let { item, isToday = false }: { item: ReaderItem; isToday?: boolean } = $props();
+
+	// TODO(pjt): 특정 레포가 아닌 컨트리뷰션안내페이지로 링크 변경
+	const CONTRIBUTE_URL = 'https://github.com/maeilham/backend-ops/blob/main/CONTRIBUTING.md';
+	const showReview = $derived(isToday && !!item.review);
 
 	let revealed = $state(false);
 	const open = $derived(revealed || !!item.read);
 
-	// 헤더 메타 줄. 서버에 없는 값(날짜, 읽는 시간)은 비어 있으면 빼고 그린다.
+	// 복습이면 마지막으로 나온 날을 "먼저 생각해보세요" 박스에서 알려 준다. 서버가 날짜를 안 주면 기본 문구를 쓴다.
+	const previousLabel = $derived(showReview ? previousDayLabel(item.previousDay) : '');
 	const metaParts = $derived(
 		[isToday ? '오늘의 질문' : item.dateLabel, item.label, item.minutes ? `${item.minutes}분` : undefined].filter(
 			(p): p is string => !!p
@@ -43,6 +49,12 @@
 		<section class="think" aria-labelledby="think-title">
 			<h2 id="think-title">먼저 생각해보세요</h2>
 			<p>30초만 내 답을 떠올려 본 뒤에 확인하면 훨씬 오래 남아요.</p>
+			{#if previousLabel}
+				<dl class="think-meta">
+					<dt>마지막으로 나온 날</dt>
+					<dd>{previousLabel}</dd>
+				</dl>
+			{/if}
 		</section>
 
 		<div class="sticky">
@@ -80,6 +92,13 @@
 			{/if}
 		</section>
 
+		{#if showReview}
+			<p class="review-note">
+				오늘은 지난 질문을 다시 풀어보는 날이었어요.
+				<a href={CONTRIBUTE_URL} target="_blank" rel="noopener noreferrer">새로운 질문을 기여해 주세요 →</a>
+			</p>
+		{/if}
+
 		{#if auth.status === 'subscriber' && isToday}
 			<section class="complete" aria-label="오늘 완료">
 				<p class="complete-title">오늘은 여기까지</p>
@@ -114,6 +133,16 @@
 	}
 	.meta .dot {
 		color: var(--mute);
+	}
+	.review-note {
+		margin: 24px 0 0;
+		font-size: 13px;
+		line-height: 1.6;
+		color: var(--mute);
+	}
+	.review-note a {
+		color: var(--accent-text);
+		font-weight: 600;
 	}
 	.mono {
 		font-family: var(--mono);
@@ -164,6 +193,24 @@
 		margin: 0;
 		font-size: 14px;
 		line-height: 1.6;
+		color: var(--sub);
+	}
+	/* 복습일 때만: 문장이 아니라 항목과 값으로 조용하게 */
+	.think-meta {
+		display: flex;
+		gap: 8px;
+		margin: 14px 0 0;
+		padding-top: 12px;
+		border-top: 1px solid var(--line);
+		font-size: 13px;
+		line-height: 1.5;
+	}
+	.think-meta dt {
+		color: var(--mute);
+	}
+	.think-meta dd {
+		margin: 0;
+		font-weight: 600;
 		color: var(--sub);
 	}
 

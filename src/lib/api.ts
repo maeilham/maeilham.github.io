@@ -52,9 +52,17 @@ async function toApiError(res: Response): Promise<ApiError> {
 	return new ApiError(res.status, message);
 }
 
+// 인증이 없는 공개 API 호출. 개발 서버에서만 UI 테스트용 가짜 응답(?mock)을 끼운다(운영 빌드에서는 빠진다).
+async function apiFetch(path: string, init?: RequestInit): Promise<Response> {
+	if (import.meta.env?.DEV) {
+		const fake = await devResponse(path, init?.method ?? 'GET', init?.signal ?? undefined);
+		if (fake) return fake;
+	}
+	return fetch(`${API_URL}${path}`, init);
+}
+
 export async function getContent(repo: string, id: string, signal?: AbortSignal): Promise<ContentDetail> {
-	const url = `${API_URL}/api/contents/${encodeURIComponent(repo)}/${encodeURIComponent(id)}`;
-	const res = await fetch(url, { signal });
+	const res = await apiFetch(`/api/contents/${encodeURIComponent(repo)}/${encodeURIComponent(id)}`, { signal });
 	if (!res.ok) throw await toApiError(res);
 	return res.json();
 }
@@ -67,11 +75,13 @@ export interface TodayItem {
 	title: string;
 	preview: string;
 	tags: string[];
+	review?: boolean; // 이미 나온 글을 다시 보여 주는 복습이면 true. 서버가 아직 안 주면 없음
+	previousDay?: string; // 복습이면 이 글이 마지막으로 오늘의 질문이었던 날('YYYY-MM-DD'). 새 글이면 필드가 없음
 }
 
 // 보여줄 글이 하나도 없으면 서버가 404를 준다. 화면은 이를 "아직 없음"으로 처리한다.
 export async function getToday(signal?: AbortSignal): Promise<TodayItem> {
-	const res = await fetch(`${API_URL}/api/today`, { signal });
+	const res = await apiFetch('/api/today', { signal });
 	if (!res.ok) throw await toApiError(res);
 	const body = await res.json();
 	return body.item;

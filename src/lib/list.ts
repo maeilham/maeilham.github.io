@@ -32,3 +32,14 @@ export function serviceDateLabel(now: Date = new Date()): string {
 	const get = (type: string) => parts.find((p) => p.type === type)?.value ?? '';
 	return `${get('year')}.${get('month')}.${get('day')}`;
 }
+
+// 서버가 준 서비스의 날짜('YYYY-MM-DD')를 "10월 9일"로. 서비스의 올해가 아니면 "2025년 10월 9일"처럼 연도를 붙인다.
+// 문자열을 그대로 쪼개서 쓰므로 기기 시간대의 영향을 받지 않는다. 값이 없거나 형식이 다르면 빈 문자열.
+export function previousDayLabel(day?: string, now: Date = new Date()): string {
+	const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(day ?? '');
+	if (!m) return '';
+	const [year, month, date] = [Number(m[1]), Number(m[2]), Number(m[3])];
+	if (month < 1 || month > 12 || date < 1 || date > 31) return '';
+	const currentYear = Number(serviceDateLabel(now).slice(0, 4));
+	return `${year === currentYear ? '' : `${year}년 `}${month}월 ${date}일`;
+}

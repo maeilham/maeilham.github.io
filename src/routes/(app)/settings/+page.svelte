@@ -180,7 +180,7 @@
 			<p class="hint">아직 받아볼 수 있는 분야가 없어요.</p>
 		{:else}
 			<p class="hint">
-				{enabledCount}개 선택됨 · 여러 분야를 골라도 메일은 하루 한 통으로 묶여서 와요.
+				{enabledCount}개 선택됨 · 여러 분야를 골라도 알림 메일은 하루 한 통으로 묶여서 와요.
 			</p>
 			<ul class="sources">
 				{#each sources as s (s.repo)}

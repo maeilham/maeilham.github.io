@@ -22,7 +22,7 @@
 			status = 'error';
 			error =
 				e instanceof ApiError && e.status === 400
-					? '링크가 만료됐거나 올바르지 않아요. 링크는 발송 후 48시간 동안만 유효해요.'
+					? '링크가 만료됐거나 올바르지 않아요.'
 					: '해지하지 못했어요. 잠시 후 다시 시도해주세요.';
 		}
 	}
@@ -44,7 +44,7 @@
 	</Notice>
 {:else}
 	<Notice title="구독을 해지할까요?">
-		<p>해지하면 더 이상 매일 아침 메일이 오지 않아요.</p>
+		<p>해지하면 더 이상 알림 메일이 오지 않아요.</p>
 		{#if status === 'error'}
 			<p class="error" role="alert">{error}</p>
 		{/if}

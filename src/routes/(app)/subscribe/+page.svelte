@@ -14,7 +14,7 @@
 </script>
 
 <svelte:head>
-	<title>메일로 받기 · 매일함</title>
+	<title>새 질문 메일로 받기 · 매일함</title>
 </svelte:head>
 
 <div class="page">
@@ -22,7 +22,7 @@
 
 	<!-- 화면 세로 중앙: 이용 흐름(제목 자리) + 이메일 입력 -->
 	<main class="center">
-		<h1 class="sr-only">매일 아침 메일로 받아보기</h1>
+		<h1 class="sr-only">새 질문 메일로 받아보기</h1>
 
 		<div class="inner">
 			{#if form.status === 'sent'}
@@ -34,7 +34,7 @@
 				<a class="link" href="/">오늘의 질문으로 돌아가기</a>
 			{:else}
 				<ol class="how" aria-label="이렇게 읽어요">
-					<li><span class="num">1</span>아침에 메일이 도착해요</li>
+					<li><span class="num">1</span>새 질문이 올라오는 날 아침에 메일이 와요</li>
 					<li><span class="num">2</span>탭 한 번으로 질문을 열어요</li>
 					<li><span class="num">3</span>먼저 생각해보고, 답을 확인해요</li>
 					<li><span class="num">4</span>내 답을 GitHub에 남겨보세요</li>

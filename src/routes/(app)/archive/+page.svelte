@@ -33,7 +33,7 @@
 
 <header class="head">
 	<h1>지난 질문</h1>
-	<p>놓친 날도, 다시 보고 싶은 날도 여기서 읽어요.</p>
+	<p>{status.kind === 'ready' && list.length > 0 ? `지금까지 ${list.length}개의 질문이 쌓였어요` : ''}</p>
 </header>
 
 {#if status.kind === 'loading'}
@@ -83,6 +83,7 @@
 	}
 	.head p {
 		margin: 0;
+		min-height: 1.5em; /* 목록을 불러오는 동안에도 자리를 잡아 개수가 뜰 때 화면이 밀리지 않게 함 */
 		font-size: 14px;
 		color: var(--mute);
 	}

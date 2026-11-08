@@ -88,7 +88,7 @@
 			{/if}
 			<!-- 비구독자에게만. 'unknown'(서버 확인 전)에는 그리지 않아 구독자에게 깜빡이지 않게 한다 -->
 			{#if auth.status === 'visitor'}
-				<a class="secondary" href="/subscribe">매일 아침 메일로 받기</a>
+				<a class="secondary" href="/subscribe">새 질문 메일로 받기</a>
 			{/if}
 		</section>
 
@@ -102,7 +102,7 @@
 		{#if auth.status === 'subscriber' && isToday}
 			<section class="complete" aria-label="오늘 완료">
 				<p class="complete-title">오늘은 여기까지</p>
-				<p class="complete-sub">내일 아침에 다음 질문이 도착해요.</p>
+				<p class="complete-sub">내일 다음 질문이 열려요.</p>
 			</section>
 		{/if}
 	{/if}

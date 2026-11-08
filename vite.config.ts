@@ -11,9 +11,6 @@ const buildSha = (process.env.GITHUB_SHA ?? 'dev').slice(0, 7);
 
 export default defineConfig({
 	plugins: [tailwindcss(), sveltekit()],
-	optimizeDeps: {
-		include: ['@xterm/xterm', '@xterm/addon-fit', '@xterm/addon-web-links'],
-	},
 	define: {
 		__BUILD_INFO__: JSON.stringify({ sha: buildSha, builtAt: new Date().toISOString() }),
 	},

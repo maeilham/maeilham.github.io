@@ -13,7 +13,7 @@
 </script>
 
 <svelte:head>
-	<meta name="description" content="하루 한 통, 개발 면접 질문을 드립니다." />
+	<meta name="description" content="하루 한 문제, 개발 면접 질문을 만나보세요." />
 </svelte:head>
 
 {@render children()}

@@ -13,7 +13,7 @@
 
 {#if confirmed}
 	<Notice title="구독이 완료됐어요">
-		<p>내일 아침부터 질문이 메일로 도착해요.</p>
+		<p>새 질문이 올라오는 날 아침에 메일로 알려드려요.</p>
 		<a class="btn" href="/">오늘의 질문 보기</a>
 	</Notice>
 {:else}

@@ -44,7 +44,7 @@
 	</Notice>
 {:else}
 	<Notice title="구독을 해지할까요?">
-		<p>해지하면 더 이상 매일 아침 메일이 오지 않아요.</p>
+		<p>해지하면 더 이상 새 질문 알림 메일이 오지 않아요.</p>
 		{#if status === 'error'}
 			<p class="error" role="alert">{error}</p>
 		{/if}

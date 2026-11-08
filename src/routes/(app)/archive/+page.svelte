@@ -33,7 +33,7 @@
 
 <header class="head">
 	<h1>지난 질문</h1>
-	<p>{status.kind === 'ready' ? `${list.length}개의 질문` : ''}</p>
+	<p>{status.kind === 'ready' && list.length > 0 ? `지금까지 ${list.length}개의 질문이 쌓였어요` : ''}</p>
 </header>
 
 {#if status.kind === 'loading'}
